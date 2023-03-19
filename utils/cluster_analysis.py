@@ -255,7 +255,7 @@ def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map):
     df['kmeans'] = [label_counts[label].most_common(1)[0][0] for label in best_kmeans['labels']]
     print("map values are:", attributes_map, '\n')
     print("kmeans values before are:", df['kmeans'], '\n')
-    df['kmeans'].map(attributes_map)
+    df['kmeans'] = df['kmeans'].replace(attributes_map)
     print("kmeans values after are:", df['kmeans'], '\n')
 
     for col, hue_attribute in enumerate(['organ', 'celltype', 'kmeans']):
