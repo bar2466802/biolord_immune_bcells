@@ -262,10 +262,12 @@ def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map):
     print("----------------------------------------")
     print("indexes of kmeans before:")
     print("----------------------------------------")
-    map_indexes_kmeans = print_indexes(list(best_kmeans['labels']))
-    print("map before:", map_indexes_kmeans)
+    map_indexes_kmeans = pd.DataFrame(print_indexes(list(best_kmeans['labels'])), index=[0])
+    print("map before:")
+    map_indexes_kmeans.style
     map_indexes_kmeans.replace(map_indexes_truth, inplace=True)
-    print("map after:", map_indexes_kmeans)
+    print("map after:")
+    map_indexes_kmeans.style
 
     print("indexes of kmeans after:")
     print_indexes(new_labels)
@@ -313,8 +315,7 @@ def print_indexes(list_):
         print(f"Indexes of {value}: {indexes}")
         for i in indexes:
             map_indexes[str(i)] = value
-    print("map before conv:", map_indexes)
-    return pd.DataFrame(map_indexes, index=[0])
+    return map_indexes
 
 
 def silhouette(km, X):
