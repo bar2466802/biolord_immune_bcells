@@ -274,6 +274,9 @@ def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map):
             df[property_] = switch_to_celltype_fullname(df['kmeans'])
         elif attribute == "organ":
             df[property_] = switch_to_organ_fullname(df['kmeans'])
+        print(print(f'kmeans: {property_} after formmating:'))
+        print(df[property_])
+        print('-------------------------------------------')
 
         labels_truth = df['celltype_key']
     # unique_labels_kmeans = list(set(best_kmeans['labels']))
