@@ -255,7 +255,19 @@ def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map):
     label_counts = {label: Counter([df['celltype_key'][i] for i in range(len(best_kmeans['labels'])) if best_kmeans['labels'][i] == label]) for label in
                     set(best_kmeans['labels'])}
     new_labels = [label_counts[label].most_common(1)[0][0] for label in best_kmeans['labels']]
+
     print("kmeans values after are:", new_labels, '\n')
+    print_indexes(list(df['celltype_key']))
+    print_indexes(new_labels)
+
+    # 2nd attempted
+    # Determine the majority label in labels1
+    # majority_label = Counter(labels1).most_common(1)[0][0]
+    # # Create a dictionary mapping each label in labels1 to its corresponding ID
+    # id_dict = {label: i for i, label in enumerate(set(labels1))}
+    # # Transfer the IDs from labels1 to labels2 based on majority rule
+    # ids2 = [id_dict[label] if label == majority_label else -1 for label in labels2]
+
     df['kmeans'] = new_labels
     df['kmeans'] = df['kmeans'].replace(attributes_map)
     df['kmeans'] = switch_to_celltype_fullname(df['kmeans'])
@@ -281,6 +293,12 @@ def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map):
     fig.suptitle(title, fontsize=16)
     plt.savefig(save_path + "umap_with_kmeans_labels.png", format="png", dpi=300)
     plt.show()
+
+
+def print_indexes(list_):
+    for value in set(list_):
+        indexes = [i for i, x in enumerate(list_) if x == value]
+        print(f"Indexes of {value}: {indexes}")
 
 
 def silhouette(km, X):
