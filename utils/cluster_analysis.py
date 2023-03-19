@@ -253,9 +253,9 @@ def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map):
     title += '\nBest kmeans got Adjusted Rand Index score of: ' + str(round(best_kmeans['score'], 3)) + \
              ' with n_clusters = ' + str(best_kmeans['n_clusters'])
 
+    attributes_color_map = {}
     for attribute in ATTRIBUTES:
         # Determine the most common label for each label in best_kmeans['labels']
-        # print("kmeans values before are:", best_kmeans['labels'], '\n')
         attribute_key = attribute + '_key'
         ground_truth_labels = df[attribute_key]
         label_counts = {label: Counter([ground_truth_labels[i] for i in range(len(best_kmeans['labels'])) if best_kmeans['labels'][i] == label]) for label in
@@ -263,20 +263,18 @@ def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map):
         new_labels = [label_counts[label].most_common(1)[0][0] for label in best_kmeans['labels']]
         property_ = 'kmeans_' + attribute
         df[property_] = new_labels
-        # print(f'att:{attribute}')
-        # print(attributes_map[attribute])
-        # print(f'kmeans: {property_}')
-        # print(df[property_])
         df[property_] = df[property_].replace(attributes_map[attribute])
-        # print(print(f'kmeans: {property_} after replace:'))
-        # print(df[property_])
         if attribute == "celltype":
             df[property_] = switch_to_celltype_fullname(df[property_])
         elif attribute == "organ":
             df[property_] = switch_to_organ_fullname(df[property_])
-        # print(print(f'kmeans: {property_} after formmating:'))
-        # print(df[property_])
-        # print('-------------------------------------------')
+
+        # Generate a color palette
+        n_labels = len(np.unique(df[attribute]))
+        palette = sns.color_palette('hls', n_labels)
+        # Create the color dictionary
+        color_dict = dict(zip(np.unique(df[attribute]), palette))
+        attributes_color_map[attribute] = color_dict
 
         labels_truth = df['celltype_key']
     # unique_labels_kmeans = list(set(best_kmeans['labels']))
@@ -318,6 +316,10 @@ def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map):
     # ids2 = [id_dict[label] if label == majority_label else -1 for label in labels2]
 
     for col, hue_attribute in enumerate(['organ', 'celltype', 'kmeans_celltype']):
+        attribute = hue_attribute
+        if "kmeans_" in attribute:
+            attribute = attribute.replace("kmeans_", "")
+        color_pal = attributes_color_map[attribute]
         sns.scatterplot(
             data=df,
             x="umap1",
@@ -326,7 +328,7 @@ def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map):
             ax=axs[col],
             alpha=.8,
             s=60,
-            palette="deep"
+            palette=color_pal
         )
         unique_labels = len(list(set(df[hue_attribute])))
         subplot_title = "Color is set to: " + hue_attribute + ", Number of unique labels: " + str(unique_labels)
