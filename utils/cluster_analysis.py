@@ -247,7 +247,7 @@ def kmeans_scores_plot(X, true_labels, title, save_path):
 
 
 def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map):
-    fig, axs = plt.subplots(1, 3, figsize=(18, 5), gridspec_kw={"width_ratios":[1, 1, 1]})
+    fig, axs = plt.subplots(1, 3, figsize=(22, 5), gridspec_kw={"width_ratios": [1, 1, 1]})
     # plt.subplots_adjust(wspace=0.2)
     # df['kmeans'] = best_kmeans['labels']
     title += '\nBest kmeans got Adjusted Rand Index score of: ' + str(round(best_kmeans['score'], 3)) + \
@@ -263,6 +263,8 @@ def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map):
         new_labels = [label_counts[label].most_common(1)[0][0] for label in best_kmeans['labels']]
         property_ = 'kmeans_' + attribute
         df[property_] = new_labels
+        print(f'att:{attribute}')
+        print(attributes_map[attribute])
         df[property_] = df[property_].replace(attributes_map[attribute])
         if attribute == "celltype":
             df[property_] = switch_to_celltype_fullname(df['kmeans'])
