@@ -53,6 +53,8 @@ score_funcs = [
     ("Adjusted Mutual Information", metrics.adjusted_mutual_info_score),
 ]
 
+ATTRIBUTES = ['celltype', 'organ']
+
 
 # Functions
 def rand_index(X: np.ndarray, true_labels: np.ndarray, df: pd.DataFrame, attributes_map, title: str, save_path: str) -> np.ndarray:
@@ -245,38 +247,48 @@ def kmeans_scores_plot(X, true_labels, title, save_path):
 
 
 def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map):
-    fig, axs = plt.subplots(1, 3, figsize=(18, 8))
+    fig, axs = plt.subplots(1, 3, figsize=(10, 4), subplot_kw={'wspace': 0.4})
     # df['kmeans'] = best_kmeans['labels']
     title += '\nBest kmeans got Adjusted Rand Index score of: ' + str(round(best_kmeans['score'], 3)) + \
              ' with n_clusters = ' + str(best_kmeans['n_clusters'])
 
-    # Determine the most common label for each label in best_kmeans['labels']
-    print("kmeans values before are:", best_kmeans['labels'], '\n')
-    label_counts = {label: Counter([df['celltype_key'][i] for i in range(len(best_kmeans['labels'])) if best_kmeans['labels'][i] == label]) for label in
-                    set(best_kmeans['labels'])}
-    new_labels = [label_counts[label].most_common(1)[0][0] for label in best_kmeans['labels']]
+    for attribute in ATTRIBUTES:
+        # Determine the most common label for each label in best_kmeans['labels']
+        print("kmeans values before are:", best_kmeans['labels'], '\n')
+        attribute_key = attribute + '_key'
+        ground_truth_labels = df[attribute_key]
+        label_counts = {label: Counter([ground_truth_labels[i] for i in range(len(best_kmeans['labels'])) if best_kmeans['labels'][i] == label]) for label in
+                        set(best_kmeans['labels'])}
+        new_labels = [label_counts[label].most_common(1)[0][0] for label in best_kmeans['labels']]
+        property_ = 'kmeans_' + attribute
+        df[property_] = new_labels
+        df[property_] = df[property_].replace(attributes_map[attribute])
+        if attribute == "celltype":
+            df[property_] = switch_to_celltype_fullname(df['kmeans'])
+        elif attribute == "organ":
+            df[property_] = switch_to_organ_fullname(df['kmeans'])
 
-    labels_truth = df['celltype_key']
-    unique_labels_kmeans = list(set(best_kmeans['labels']))
-    for l in unique_labels_kmeans:
-        indexes = [i for i in range(len(best_kmeans['labels'])) if best_kmeans['labels'][i] == l]
-        values = [labels_truth[i] for i in indexes]
-        counts = Counter(values)
-        total_count = len(values)
-        print(f'For the label {l}:')
-        for value, count in counts.items():
-            percentage = count / total_count * 100
-            print(f'{value}: {percentage}%')
-        most_common_label = max(counts, key=counts.get)
-        print(f'For the label {l} the new label will be: {most_common_label}')
-
-    print("kmeans values after are:", new_labels, '\n')
-    print("indexes of ground truth:")
-    map_indexes_truth = print_indexes(list(df['celltype_key']))
-    print("----------------------------------------")
-    print("indexes of kmeans before:")
-    print("----------------------------------------")
-    map_indexes_kmeans = pd.DataFrame(print_indexes(list(best_kmeans['labels'])), index=[0])
+        labels_truth = df['celltype_key']
+    # unique_labels_kmeans = list(set(best_kmeans['labels']))
+    # for l in unique_labels_kmeans:
+    #     indexes = [i for i in range(len(best_kmeans['labels'])) if best_kmeans['labels'][i] == l]
+    #     values = [labels_truth[i] for i in indexes]
+    #     counts = Counter(values)
+    #     total_count = len(values)
+    #     print(f'For the label {l}:')
+    #     for value, count in counts.items():
+    #         percentage = count / total_count * 100
+    #         print(f'{value}: {percentage}%')
+    #     most_common_label = max(counts, key=counts.get)
+    #     print(f'For the label {l} the new label will be: {most_common_label}')
+    #
+    # print("kmeans values after are:", new_labels, '\n')
+    # print("indexes of ground truth:")
+    # map_indexes_truth = print_indexes(list(df['celltype_key']))
+    # print("----------------------------------------")
+    # print("indexes of kmeans before:")
+    # print("----------------------------------------")
+    # map_indexes_kmeans = pd.DataFrame(print_indexes(list(best_kmeans['labels'])), index=[0])
     # print("map before:")
     # print(map_indexes_kmeans)
     # map_indexes_kmeans.replace(map_indexes_truth, inplace=True)
@@ -295,11 +307,7 @@ def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map):
     # # Transfer the IDs from labels1 to labels2 based on majority rule
     # ids2 = [id_dict[label] if label == majority_label else -1 for label in labels2]
 
-    df['kmeans'] = new_labels
-    df['kmeans'] = df['kmeans'].replace(attributes_map)
-    df['kmeans'] = switch_to_celltype_fullname(df['kmeans'])
-
-    for col, hue_attribute in enumerate(['organ', 'celltype', 'kmeans']):
+    for col, hue_attribute in enumerate(['organ', 'celltype', 'kmeans_celltype']):
         sns.scatterplot(
             data=df,
             x="umap1",
