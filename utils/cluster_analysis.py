@@ -316,7 +316,7 @@ def print_indexes(list_):
         for i in indexes:
             map_indexes[str(i)] = value
     print("map before conv:", map_indexes)
-    return pd.DataFrame(map_indexes)
+    return pd.DataFrame(map_indexes, index=[0])
 
 
 def silhouette(km, X):
