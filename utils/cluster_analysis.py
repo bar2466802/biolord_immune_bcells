@@ -262,6 +262,11 @@ def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map):
         indexes = [i for i in range(len(best_kmeans['labels'])) if best_kmeans['labels'][i] == l]
         values = [labels_truth[i] for i in indexes]
         counts = Counter(values)
+        total_count = len(values)
+        print(f'For the label {l}:')
+        for value, count in counts.items():
+            percentage = count / total_count * 100
+            print(f'{value}: {percentage}%')
         most_common_label = max(counts, key=counts.get)
         print(f'For the label {l} the new label will be: {most_common_label}')
 
