@@ -256,22 +256,31 @@ def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map):
                     set(best_kmeans['labels'])}
     new_labels = [label_counts[label].most_common(1)[0][0] for label in best_kmeans['labels']]
 
-    print("kmeans values after are:", new_labels, '\n')
-    print("indexes of ground truth:")
-    map_indexes_truth = print_indexes(list(df['celltype_key']))
-    print("----------------------------------------")
-    print("indexes of kmeans before:")
-    print("----------------------------------------")
-    map_indexes_kmeans = pd.DataFrame(print_indexes(list(best_kmeans['labels'])), index=[0])
-    print("map before:")
-    print(map_indexes_kmeans)
-    map_indexes_kmeans.replace(map_indexes_truth, inplace=True)
-    print("map after:")
-    print(map_indexes_kmeans)
+    labels_truth = df['celltype_key']
+    unique_labels_kmeans = list(set(best_kmeans['labels']))
+    for l in unique_labels_kmeans:
+        indexes = [i for i in range(len(best_kmeans['labels'])) if best_kmeans['labels'][i] == l]
+        values = [labels_truth[i] for i in indexes]
+        counts = Counter(values)
+        most_common_label = max(counts, key=counts.get)
+        print(f'For the label {l} the new label will be: {most_common_label}')
 
-    print("indexes of kmeans after:")
-    print_indexes(new_labels)
-    print("----------------------------------------")
+        # print("kmeans values after are:", new_labels, '\n')
+    # print("indexes of ground truth:")
+    # map_indexes_truth = print_indexes(list(df['celltype_key']))
+    # print("----------------------------------------")
+    # print("indexes of kmeans before:")
+    # print("----------------------------------------")
+    # map_indexes_kmeans = pd.DataFrame(print_indexes(list(best_kmeans['labels'])), index=[0])
+    # print("map before:")
+    # print(map_indexes_kmeans)
+    # map_indexes_kmeans.replace(map_indexes_truth, inplace=True)
+    # print("map after:")
+    # print(map_indexes_kmeans)
+    #
+    # print("indexes of kmeans after:")
+    # print_indexes(new_labels)
+    # print("----------------------------------------")
 
     # 2nd attempted
     # Determine the majority label in labels1
