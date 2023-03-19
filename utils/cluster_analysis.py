@@ -17,6 +17,7 @@ from sklearn.metrics import silhouette_samples, silhouette_score
 from sklearn.metrics import rand_score
 from yellowbrick.cluster import SilhouetteVisualizer  # to continue here
 from collections import Counter
+from formatters import *
 
 
 rng = np.random.RandomState(0)
@@ -257,6 +258,7 @@ def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map):
     print("kmeans values before are:", df['kmeans'], '\n')
     df['kmeans'] = df['kmeans'].replace(attributes_map)
     print("kmeans values after are:", df['kmeans'], '\n')
+    switch_to_celltype_fullname(df['kmeans'])
 
     for col, hue_attribute in enumerate(['organ', 'celltype', 'kmeans']):
         sns.scatterplot(
