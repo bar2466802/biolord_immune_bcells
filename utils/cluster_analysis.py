@@ -264,10 +264,10 @@ def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map):
     print("----------------------------------------")
     map_indexes_kmeans = pd.DataFrame(print_indexes(list(best_kmeans['labels'])), index=[0])
     print("map before:")
-    map_indexes_kmeans.style
+    print(map_indexes_kmeans.to_markdown())
     map_indexes_kmeans.replace(map_indexes_truth, inplace=True)
     print("map after:")
-    map_indexes_kmeans.style
+    print(map_indexes_kmeans.to_markdown())
 
     print("indexes of kmeans after:")
     print_indexes(new_labels)
