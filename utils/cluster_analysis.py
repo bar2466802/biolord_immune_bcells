@@ -265,7 +265,7 @@ def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map):
         most_common_label = max(counts, key=counts.get)
         print(f'For the label {l} the new label will be: {most_common_label}')
 
-        # print("kmeans values after are:", new_labels, '\n')
+    print("kmeans values after are:", new_labels, '\n')
     print("indexes of ground truth:")
     map_indexes_truth = print_indexes(list(df['celltype_key']))
     print("----------------------------------------")
@@ -278,9 +278,9 @@ def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map):
     # print("map after:")
     # print(map_indexes_kmeans)
     #
-    print("indexes of kmeans after:")
-    print_indexes(new_labels)
-    print("----------------------------------------")
+    # print("indexes of kmeans after:")
+    # print_indexes(new_labels)
+    # print("----------------------------------------")
 
     # 2nd attempted
     # Determine the majority label in labels1
