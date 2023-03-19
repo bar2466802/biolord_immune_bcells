@@ -335,6 +335,7 @@ def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map):
         axs[col].grid(False)
         axs[col].legend(loc='center left', bbox_to_anchor=(1, 0.5))
     # plt.tight_layout()
+    fig.tight_layout(pad=5.0)
     fig.suptitle(title, fontsize=12)
     plt.savefig(save_path + "umap_with_kmeans_labels.png", format="png", dpi=300)
     plt.show()
