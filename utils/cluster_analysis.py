@@ -251,13 +251,13 @@ def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map):
              ' with n_clusters = ' + str(best_kmeans['n_clusters'])
 
     # Determine the most common label for each label in best_kmeans['labels']
+    print("kmeans values before are:", df['labels'], '\n')
     label_counts = {label: Counter([df['celltype_key'][i] for i in range(len(best_kmeans['labels'])) if best_kmeans['labels'][i] == label]) for label in
                     set(best_kmeans['labels'])}
     df['kmeans'] = [label_counts[label].most_common(1)[0][0] for label in best_kmeans['labels']]
-    print("map values are:", attributes_map, '\n')
-    print("kmeans values before are:", df['kmeans'], '\n')
-    df['kmeans'] = df['kmeans'].replace(attributes_map)
+    print("kmeans values before are:", df['labels'], '\n')
     print("kmeans values after are:", df['kmeans'], '\n')
+    df['kmeans'] = df['kmeans'].replace(attributes_map)
     df['kmeans'] = switch_to_celltype_fullname(df['kmeans'])
 
     for col, hue_attribute in enumerate(['organ', 'celltype', 'kmeans']):
