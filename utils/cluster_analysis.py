@@ -16,6 +16,8 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_samples, silhouette_score
 from sklearn.metrics import rand_score
 from yellowbrick.cluster import SilhouetteVisualizer  # to continue here
+from collections import Counter
+
 
 rng = np.random.RandomState(0)
 
@@ -52,7 +54,7 @@ score_funcs = [
 
 
 # Functions
-def rand_index(X: np.ndarray, true_labels: np.ndarray, df: pd.DataFrame, title: str, save_path: str) -> np.ndarray:
+def rand_index(X: np.ndarray, true_labels: np.ndarray, df: pd.DataFrame, attributes_map, title: str, save_path: str) -> np.ndarray:
     """
     Evaluate the latent space clustering, comparing known labels to kmeans clustering using the Rand index score
     :param X: The latent space data
@@ -81,7 +83,7 @@ def rand_index(X: np.ndarray, true_labels: np.ndarray, df: pd.DataFrame, title: 
     uniform_labelings_scores_plot(X, true_labels, title, save_path)
     best_kmeans = kmeans_scores_plot(X, true_labels, title, save_path)
     print("kmeans labels are:", best_kmeans['labels'])
-    umap_with_kmeans_labels(df, best_kmeans, title, save_path)
+    umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map)
     return df_metrics
 
 
@@ -241,12 +243,17 @@ def kmeans_scores_plot(X, true_labels, title, save_path):
     return ari_best_kmeans
 
 
-def umap_with_kmeans_labels(df, best_kmeans, title, save_path):
-    fig, axs = plt.subplots(1, 3, layout='constrained', figsize=(18, 8))
-    df['kmeans'] = best_kmeans['labels']
-    row = col = 0
+def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map):
+    fig, axs = plt.subplots(1, 3, figsize=(18, 8))
+    # df['kmeans'] = best_kmeans['labels']
     title += '\nBest kmeans got Adjusted Rand Index score of: ' + str(round(best_kmeans['score'], 3)) + \
              ' with n_clusters = ' + str(best_kmeans['n_clusters'])
+
+    # Determine the most common label for each label in best_kmeans['labels']
+    label_counts = {label: Counter([df['celltype_key'][i] for i in range(len(best_kmeans['labels'])) if best_kmeans['labels'][i] == label]) for label in
+                    set(best_kmeans['labels'])}
+    df['kmeans'] = [label_counts[label].most_common(1)[0][0] for label in best_kmeans['labels']]
+    df.replace({"kmeans": attributes_map['celltype']})
 
     for col, hue_attribute in enumerate(['organ', 'celltype', 'kmeans']):
         sns.scatterplot(
@@ -259,7 +266,7 @@ def umap_with_kmeans_labels(df, best_kmeans, title, save_path):
             s=60,
             palette="deep"
         )
-        axs[col].set_title("UMAP - color set to: " + hue_attribute)
+        axs[col].set_title("Color is set to: " + hue_attribute)
         axs[col].set(xticklabels=[], yticklabels=[])
         axs[col].set_xlabel("UMAP1")
         axs[col].set_ylabel("UMAP2")
@@ -269,41 +276,6 @@ def umap_with_kmeans_labels(df, best_kmeans, title, save_path):
     fig.suptitle(title, fontsize=16)
     plt.savefig(save_path + "umap_with_kmeans_labels.png", format="png", dpi=300)
     plt.show()
-
-
-# def umap_with_kmeans_labels(df, kmeans_labels, title, save_path):
-#     N = 4
-#     fig, axs = plt.subplots(2, 2, layout='constrained', figsize=(6.5 * 4, 7.5 * ceil(N/4)) )
-#
-#     df['kmeans'] = kmeans_labels
-#     row = col = 0
-#     ['organ', 'celltype', 'kmeans']
-#     for hue_attribute, style_attribute in [('organ', 'celltype'), ('celltype', 'organ'), ('kmeans', 'celltype'), ('kmeans', 'organ')]:
-#             if hue_attribute == 'kmeans' and row == 0:
-#                 row += 1
-#             if col == 2:
-#                 col = 0
-#             sns.scatterplot(
-#                 data=df,
-#                 x="umap1",
-#                 y="umap2",
-#                 hue=hue_attribute,
-#                 style=style_attribute,
-#                 ax=axs[row][col],
-#                 alpha=.8,
-#                 s=60,
-#                 palette="deep"
-#             )
-#             axs[row][col].set_title("color = " + hue_attribute + ", shape = " + style_attribute)
-#             axs[row][col].set(xticklabels=[], yticklabels=[])
-#             axs[row][col].set_xlabel("UMAP1")
-#             axs[row][col].set_ylabel("UMAP2")
-#             axs[row][col].grid(False)
-#             axs[row][col].legend(loc="upper left", bbox_to_anchor=(1, 1), ncols=2)
-#             col += 1
-#     # plt.tight_layout()
-#     plt.savefig(save_path + "umap_with_kmeans_labels.png", format="png", dpi=300)
-#     plt.show()
 
 
 def silhouette(km, X):
