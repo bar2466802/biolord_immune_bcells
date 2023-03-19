@@ -328,7 +328,9 @@ def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map):
             s=60,
             palette="deep"
         )
-        axs[col].set_title("Color is set to: " + hue_attribute)
+        unique_labels = list(set(df[hue_attribute]))
+        subplot_title = "Color is set to: " + hue_attribute + ", # of unique labels: " + str(unique_labels)
+        axs[col].set_title(subplot_title)
         axs[col].set(xticklabels=[], yticklabels=[])
         axs[col].set_xlabel("UMAP1")
         axs[col].set_ylabel("UMAP2")
@@ -336,7 +338,7 @@ def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map):
         axs[col].legend(loc='center left', bbox_to_anchor=(1, 0.5))
     # plt.tight_layout()
     fig.tight_layout(pad=5.0)
-    fig.suptitle(title, fontsize=12)
+    fig.suptitle(title, fontsize=14)
     plt.savefig(save_path + "umap_with_kmeans_labels.png", format="png", dpi=300)
     plt.show()
 
