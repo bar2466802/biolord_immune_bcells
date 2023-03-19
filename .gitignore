@@ -14,3 +14,10 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+.idea
+.ckpt
+
+# Data folder
+data/
+# Output
+output/
