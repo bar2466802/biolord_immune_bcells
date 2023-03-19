@@ -315,6 +315,7 @@ def print_indexes(list_):
         print(f"Indexes of {value}: {indexes}")
         for i in indexes:
             map_indexes[i] = value
+    print("map before conv:", map_indexes)
     return pd.DataFrame(map_indexes)
 
 
