@@ -184,13 +184,11 @@ def uniform_labelings_scores_plot(X, true_labels, title, save_path):
 
 def kmeans_scores(X, true_labels, score_func, n_clusters_range, n_runs=5):
     scores = np.zeros((len(n_clusters_range), n_runs))
-    labels_kmeans_to_return = []
     best_kmeans = {
         "labels": [],
         "n_clusters": 0,
         "km": None
     }
-    n_classes = len(set(true_labels)) - (1 if -1 in true_labels else 0)
     max_score = -np.inf
     for i, n_clusters in enumerate(n_clusters_range):
         for j in range(n_runs):
@@ -242,30 +240,31 @@ def kmeans_scores_plot(X, true_labels, title, save_path):
     plt.show()
     return ari_best_kmeans
 
+
 def umap_with_kmeans_labels(df, best_kmeans, title, save_path):
-    fig, axs = plt.subplots(1, 3, layout='constrained', figsize=(25, 6))
+    fig, axs = plt.subplots(1, 3, layout='constrained')
     df['kmeans'] = best_kmeans['labels']
     row = col = 0
-    title += '\nBest kmeans got Adjusted Rand Index score of: ' + str(round(best_kmeans['score'], 3)) +\
+    title += '\nBest kmeans got Adjusted Rand Index score of: ' + str(round(best_kmeans['score'], 3)) + \
              ' with n_clusters = ' + str(best_kmeans['n_clusters'])
 
     for col, hue_attribute in enumerate(['organ', 'celltype', 'kmeans']):
-            sns.scatterplot(
-                data=df,
-                x="umap1",
-                y="umap2",
-                hue=hue_attribute,
-                ax=axs[col],
-                alpha=.8,
-                s=60,
-                palette="deep"
-            )
-            axs[col].set_title("UMAP - color set to: " + hue_attribute)
-            axs[col].set(xticklabels=[], yticklabels=[])
-            axs[col].set_xlabel("UMAP1")
-            axs[col].set_ylabel("UMAP2")
-            axs[col].grid(False)
-            axs[col].legend(loc='center left', bbox_to_anchor=(1, 0.5))
+        sns.scatterplot(
+            data=df,
+            x="umap1",
+            y="umap2",
+            hue=hue_attribute,
+            ax=axs[col],
+            alpha=.8,
+            s=60,
+            palette="deep"
+        )
+        axs[col].set_title("UMAP - color set to: " + hue_attribute)
+        axs[col].set(xticklabels=[], yticklabels=[])
+        axs[col].set_xlabel("UMAP1")
+        axs[col].set_ylabel("UMAP2")
+        axs[col].grid(False)
+        axs[col].legend(loc='center left', bbox_to_anchor=(1, 0.5))
     # plt.tight_layout()
     fig.suptitle(title, fontsize=16)
     plt.savefig(save_path + "umap_with_kmeans_labels.png", format="png", dpi=300)
