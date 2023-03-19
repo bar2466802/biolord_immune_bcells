@@ -254,8 +254,9 @@ def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map):
     print("kmeans values before are:", best_kmeans['labels'], '\n')
     label_counts = {label: Counter([df['celltype_key'][i] for i in range(len(best_kmeans['labels'])) if best_kmeans['labels'][i] == label]) for label in
                     set(best_kmeans['labels'])}
-    df['kmeans'] = [label_counts[label].most_common(1)[0][0] for label in best_kmeans['labels']]
-    print("kmeans values after are:", df['kmeans'], '\n')
+    new_labels = [label_counts[label].most_common(1)[0][0] for label in best_kmeans['labels']]
+    print("kmeans values after are:", new_labels, '\n')
+    df['kmeans'] = new_labels
     df['kmeans'] = df['kmeans'].replace(attributes_map)
     df['kmeans'] = switch_to_celltype_fullname(df['kmeans'])
 
