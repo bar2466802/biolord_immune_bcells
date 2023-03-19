@@ -247,8 +247,8 @@ def kmeans_scores_plot(X, true_labels, title, save_path):
 
 
 def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map):
-    fig, axs = plt.subplots(1, 3, figsize=(15, 5), gridspec_kw={"width_ratios":[1, 1, 1]})
-    plt.subplots_adjust(wspace=0.2)
+    fig, axs = plt.subplots(1, 3, figsize=(18, 5), gridspec_kw={"width_ratios":[1, 1, 1]})
+    # plt.subplots_adjust(wspace=0.2)
     # df['kmeans'] = best_kmeans['labels']
     title += '\nBest kmeans got Adjusted Rand Index score of: ' + str(round(best_kmeans['score'], 3)) + \
              ' with n_clusters = ' + str(best_kmeans['n_clusters'])
@@ -326,7 +326,7 @@ def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map):
         axs[col].grid(False)
         axs[col].legend(loc='center left', bbox_to_anchor=(1, 0.5))
     # plt.tight_layout()
-    fig.suptitle(title, fontsize=16)
+    fig.suptitle(title, fontsize=12)
     plt.savefig(save_path + "umap_with_kmeans_labels.png", format="png", dpi=300)
     plt.show()
 
