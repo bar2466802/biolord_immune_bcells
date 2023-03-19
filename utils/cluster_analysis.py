@@ -278,9 +278,9 @@ def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map):
     # print("map after:")
     # print(map_indexes_kmeans)
     #
-    # print("indexes of kmeans after:")
-    # print_indexes(new_labels)
-    # print("----------------------------------------")
+    print("indexes of kmeans after:")
+    print_indexes(new_labels)
+    print("----------------------------------------")
 
     # 2nd attempted
     # Determine the majority label in labels1
