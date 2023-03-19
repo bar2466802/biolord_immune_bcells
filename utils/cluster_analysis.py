@@ -85,7 +85,7 @@ def rand_index(X: np.ndarray, true_labels: np.ndarray, df: pd.DataFrame, attribu
     fixed_classes_uniform_labelings_scores_plot(X, true_labels, title, save_path)
     uniform_labelings_scores_plot(X, true_labels, title, save_path)
     best_kmeans = kmeans_scores_plot(X, true_labels, title, save_path)
-    print("kmeans labels are:", best_kmeans['labels'])
+    # print("kmeans labels are:", best_kmeans['labels'])
     umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map)
     return df_metrics
 
@@ -255,7 +255,7 @@ def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map):
 
     for attribute in ATTRIBUTES:
         # Determine the most common label for each label in best_kmeans['labels']
-        print("kmeans values before are:", best_kmeans['labels'], '\n')
+        # print("kmeans values before are:", best_kmeans['labels'], '\n')
         attribute_key = attribute + '_key'
         ground_truth_labels = df[attribute_key]
         label_counts = {label: Counter([ground_truth_labels[i] for i in range(len(best_kmeans['labels'])) if best_kmeans['labels'][i] == label]) for label in
