@@ -263,20 +263,20 @@ def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map):
         new_labels = [label_counts[label].most_common(1)[0][0] for label in best_kmeans['labels']]
         property_ = 'kmeans_' + attribute
         df[property_] = new_labels
-        print(f'att:{attribute}')
-        print(attributes_map[attribute])
-        print(f'kmeans: {property_}')
-        print(df[property_])
+        # print(f'att:{attribute}')
+        # print(attributes_map[attribute])
+        # print(f'kmeans: {property_}')
+        # print(df[property_])
         df[property_] = df[property_].replace(attributes_map[attribute])
-        print(print(f'kmeans: {property_} after replace:'))
-        print(df[property_])
+        # print(print(f'kmeans: {property_} after replace:'))
+        # print(df[property_])
         if attribute == "celltype":
             df[property_] = switch_to_celltype_fullname(df[property_])
         elif attribute == "organ":
             df[property_] = switch_to_organ_fullname(df[property_])
-        print(print(f'kmeans: {property_} after formmating:'))
-        print(df[property_])
-        print('-------------------------------------------')
+        # print(print(f'kmeans: {property_} after formmating:'))
+        # print(df[property_])
+        # print('-------------------------------------------')
 
         labels_truth = df['celltype_key']
     # unique_labels_kmeans = list(set(best_kmeans['labels']))
