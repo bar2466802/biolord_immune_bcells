@@ -30,3 +30,4 @@ def switch_to_organ_fullname(col):
             "YS": "Yolk Sac",
         }
     )
+    return col
