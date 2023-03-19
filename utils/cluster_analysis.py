@@ -258,11 +258,17 @@ def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map):
 
     print("kmeans values after are:", new_labels, '\n')
     print("indexes of ground truth:")
-    print_indexes(list(df['celltype_key']))
+    map_indexes_truth = print_indexes(list(df['celltype_key']))
     print("----------------------------------------")
     print("indexes of kmeans before:")
     print("----------------------------------------")
-    print_indexes(list(best_kmeans['labels']))
+    map_indexes_kmeans = print_indexes(list(best_kmeans['labels']))
+    print("map before:", map_indexes_kmeans)
+    for (columnName, columnData) in map_indexes_kmeans.iteritems():
+        map_indexes_kmeans[columnName] = map_indexes_kmeans[columnName].replace(map_indexes_truth)
+
+    print("map after:", map_indexes_kmeans)
+
     print("indexes of kmeans after:")
     print_indexes(new_labels)
     print("----------------------------------------")
@@ -303,9 +309,13 @@ def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map):
 
 
 def print_indexes(list_):
+    map_indexes = {}
     for value in set(list_):
         indexes = [i for i, x in enumerate(list_) if x == value]
         print(f"Indexes of {value}: {indexes}")
+        for i in indexes:
+            map_indexes[i] = value
+    return pd.DataFrame(map_indexes)
 
 
 def silhouette(km, X):
