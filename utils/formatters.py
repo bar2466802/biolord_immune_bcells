@@ -1,3 +1,16 @@
+################################################
+# FILE: formatters.py
+# WRITERS: Bar Melinarskiy
+# DESCRIPTION: Formatters functions
+################################################
+
+import itertools
+import numpy as np
+import pandas as pd
+import biolord
+
+
+
 def switch_to_celltype_fullname(col):
     col = col.replace(
         {
@@ -31,3 +44,50 @@ def switch_to_organ_fullname(col):
         }
     )
     return col
+
+def get_transf_embeddings_attributes(model):
+    attributes_map = {
+        "celltype": model.categorical_attributes_map["celltype"],
+        "organ": model.categorical_attributes_map["organ"]
+    }
+
+    transf_embeddings_attributes = {
+        attribute_:
+            model.get_categorical_attribute_embeddings(attribute_key=attribute_)
+        for attribute_ in model.categorical_attributes_map
+    }
+
+    keys = list(
+        itertools.product(*[
+            list(model.categorical_attributes_map[attribute_].keys())
+            for attribute_ in model.categorical_attributes_map
+        ]))
+
+    transf_embeddings_attributes = [
+        np.concatenate(([
+            transf_embeddings_attributes[map_[0]][map_[1][key_[ci]], :]
+            for ci, map_ in enumerate(model.categorical_attributes_map.items())
+        ]), 0) for key_ in keys
+    ]
+
+    transf_embeddings_attributes_ind = {
+        attribute_:
+            model.get_categorical_attribute_embeddings(attribute_key=attribute_)
+        for attribute_ in attributes_map
+    }
+
+    keys = list(
+        itertools.product(*[
+            list(model.categorical_attributes_map[attribute_].keys())
+            for attribute_ in attributes_map
+        ]))
+
+    transf_embeddings_attributes = [
+        np.concatenate(([
+            transf_embeddings_attributes_ind[map_[0]][map_[1][key_[ci]], :]
+            for ci, map_ in enumerate(attributes_map.items())
+        ]), 0) for key_ in keys
+    ]
+
+    transf_embeddings_attributes = np.asarray(transf_embeddings_attributes)
+    return transf_embeddings_attributes

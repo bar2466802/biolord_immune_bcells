@@ -10,6 +10,7 @@ import pandas as pd
 from sklearn.cluster import DBSCAN
 from sklearn import metrics
 import seaborn as sns
+import colorcet as cc
 from math import ceil
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
@@ -57,7 +58,8 @@ ATTRIBUTES = ['celltype', 'organ']
 
 
 # Functions
-def rand_index(X: np.ndarray, true_labels: np.ndarray, df: pd.DataFrame, attributes_map, title: str, save_path: str) -> np.ndarray:
+def matrices_figures(X: np.ndarray, true_labels: np.ndarray, df: pd.DataFrame, attributes_map, attribute,
+               title: str, save_path: str) -> np.ndarray:
     """
     Evaluate the latent space clustering, comparing known labels to kmeans clustering using the Rand index score
     :param X: The latent space data
@@ -85,8 +87,7 @@ def rand_index(X: np.ndarray, true_labels: np.ndarray, df: pd.DataFrame, attribu
     fixed_classes_uniform_labelings_scores_plot(X, true_labels, title, save_path)
     uniform_labelings_scores_plot(X, true_labels, title, save_path)
     best_kmeans = kmeans_scores_plot(X, true_labels, title, save_path)
-    # print("kmeans labels are:", best_kmeans['labels'])
-    umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map)
+    umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map, attribute)
     return df_metrics
 
 
@@ -187,6 +188,14 @@ def uniform_labelings_scores_plot(X, true_labels, title, save_path):
     plt.show()
 
 
+def get_kmeans_score(X, true_labels, n_clusters_range = np.arange(2, 16).astype(int)):
+    scores_best_kmeans = []
+    for score_name, score_func in score_funcs:
+        scores, best_kmeans = kmeans_scores(X, true_labels, score_func, n_clusters_range)
+        best_kmeans['score_name'] = score_name
+        scores_best_kmeans.append(best_kmeans)
+    return pd.DataFrame(scores_best_kmeans)
+
 def kmeans_scores(X, true_labels, score_func, n_clusters_range, n_runs=5):
     scores = np.zeros((len(n_clusters_range), n_runs))
     best_kmeans = {
@@ -246,14 +255,15 @@ def kmeans_scores_plot(X, true_labels, title, save_path):
     return ari_best_kmeans
 
 
-def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map):
-    fig, axs = plt.subplots(1, 3, figsize=(24, 7), gridspec_kw={"width_ratios": [1, 1, 1]})
+def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map, attribute_):
+    fig, axs = plt.subplots(2, 2, figsize=(14, 7), gridspec_kw={"width_ratios": [1, 1]})
     # plt.subplots_adjust(wspace=0.2)
     # df['kmeans'] = best_kmeans['labels']
     title += '\nBest kmeans got Adjusted Rand Index score of: ' + str(round(best_kmeans['score'], 3)) + \
              ' with n_clusters = ' + str(best_kmeans['n_clusters'])
 
     attributes_color_map = {}
+    labels_all_attributes = []
     for attribute in ATTRIBUTES:
         # Determine the most common label for each label in best_kmeans['labels']
         attribute_key = attribute + '_key'
@@ -270,14 +280,14 @@ def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map):
             df[property_] = switch_to_organ_fullname(df[property_])
 
         # Generate a color palette
-        n_labels = len(np.unique(df[attribute]))
-        palette = sns.color_palette('hls', n_labels)
-        # Create the color dictionary
-        color_dict = dict(zip(np.unique(df[attribute]), palette))
-        attributes_color_map[attribute] = color_dict
+        labels_all_attributes = np.append(labels_all_attributes, np.unique(df[attribute]))
+        # n_labels = len(np.unique(df[attribute]))
+        # palette = sns.color_palette('hls', n_labels)
+        # # Create the color dictionary
+        # color_dict = dict(zip(np.unique(df[attribute]), palette))
+        # attributes_color_map[attribute] = color_dict
 
         labels_truth = df['celltype_key']
-        
         unique_labels_kmeans = list(set(best_kmeans['labels']))
         for l in unique_labels_kmeans:
             indexes = [i for i in range(len(best_kmeans['labels'])) if best_kmeans['labels'][i] == l]
@@ -290,6 +300,12 @@ def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map):
                 print(f'{value}: {percentage}%')
             most_common_label = max(counts, key=counts.get)
             print(f'For the label {l} the new label will be: {most_common_label}')
+
+    n_labels = len(np.unique(labels_all_attributes))
+    palette = sns.color_palette(cc.glasbey, n_labels)
+    # palette = sns.color_palette("husl", n_labels)
+    # Create the color dictionary
+    attributes_color_map = dict(zip(np.unique(labels_all_attributes), palette))
     #
     # print("kmeans values after are:", new_labels, '\n')
     # print("indexes of ground truth:")
@@ -316,29 +332,36 @@ def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map):
     # # Transfer the IDs from labels1 to labels2 based on majority rule
     # ids2 = [id_dict[label] if label == majority_label else -1 for label in labels2]
 
-    for col, hue_attribute in enumerate(['organ', 'celltype', 'kmeans_celltype']):
+    col = row = 0
+    for hue_attribute in ['celltype', 'kmeans_celltype', 'organ', 'kmeans_organ']:
         attribute = hue_attribute
         if "kmeans_" in attribute:
             attribute = attribute.replace("kmeans_", "")
-        color_pal = attributes_color_map[attribute]
+        # color_pal = attributes_color_map[attribute]
         sns.scatterplot(
             data=df,
             x="umap1",
             y="umap2",
             hue=hue_attribute,
-            ax=axs[col],
+            ax=axs[row][col],
             alpha=.8,
             s=60,
-            palette=color_pal
+            palette=attributes_color_map
         )
         unique_labels = len(list(set(df[hue_attribute])))
         subplot_title = "Color is set to: " + hue_attribute + ", Number of unique labels: " + str(unique_labels)
-        axs[col].set_title(subplot_title)
-        axs[col].set(xticklabels=[], yticklabels=[])
-        axs[col].set_xlabel("UMAP1")
-        axs[col].set_ylabel("UMAP2")
-        axs[col].grid(False)
-        axs[col].legend(loc='center left', bbox_to_anchor=(1, 0.5))
+        axs[row][col].set_title(subplot_title)
+        axs[row][col].set(xticklabels=[], yticklabels=[])
+        axs[row][col].set_xlabel("UMAP1")
+        axs[row][col].set_ylabel("UMAP2")
+        axs[row][col].grid(False)
+        axs[row][col].legend(loc='center left', bbox_to_anchor=(1, 0.5))
+
+        if col == 1:
+            row += 1
+            col = 0
+        else:
+            col += 1
     # plt.tight_layout()
     fig.tight_layout(pad=5.0)
     fig.suptitle(title, fontsize=14)
