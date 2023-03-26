@@ -187,16 +187,16 @@ def uniform_labelings_scores_plot(X, true_labels, title, save_path):
     plt.show()
 
 
-def get_kmeans_score(X, true_labels, n_clusters_range=np.arange(2, 16).astype(int), save_path=""):
+def get_kmeans_score(X, true_labels, n_clusters_range=np.arange(2, 16).astype(int), id_=1, save_path=""):
     scores_best_kmeans = []
     for score_name, score_func in score_funcs:
-        scores, best_kmeans = kmeans_scores(X, true_labels, score_func, n_clusters_range, save_path=save_path)
+        scores, best_kmeans = kmeans_scores(X, true_labels, score_func, n_clusters_range, id_=id_, save_path=save_path)
         best_kmeans['score_name'] = score_name
         scores_best_kmeans.append(best_kmeans)
     return pd.DataFrame(scores_best_kmeans)
 
 
-def kmeans_scores(X, true_labels, score_func, n_clusters_range, n_runs=5, save_path=""):
+def kmeans_scores(X, true_labels, score_func, n_clusters_range, n_runs=5, id_=1, save_path=""):
     scores = np.zeros((len(n_clusters_range), n_runs))
     all_kmeans = {
         "id": [],
@@ -228,7 +228,10 @@ def kmeans_scores(X, true_labels, score_func, n_clusters_range, n_runs=5, save_p
             scores[i, j] = score
     best_kmeans['score'] = max_score
     all_kmeans = pd.DataFrame(all_kmeans)
-    all_kmeans.to_csv(save_path + "kmeans_models_scores.csv")
+    if id_ == 1:
+        all_kmeans.to_csv(save_path + "kmeans_models_scores.csv")
+    else:
+        all_kmeans.to_csv(save_path + "kmeans_models_scores.csv", mode='a', header=False)
     return scores, best_kmeans
 
 
