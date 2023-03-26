@@ -98,6 +98,7 @@ def get_transf_embeddings_attributes(model):
     }
     for col_, map_ in cols.items():
         df[col_] = map_
+    print(df)
     for attribute_ in transf_embeddings_attributes_ind:
         df[attribute_ + "_key"] = df[attribute_].map(attributes_map[attribute_])
 
