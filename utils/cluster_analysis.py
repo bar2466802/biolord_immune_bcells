@@ -20,7 +20,6 @@ from yellowbrick.cluster import SilhouetteVisualizer  # to continue here
 from collections import Counter
 from formatters import *
 
-
 rng = np.random.RandomState(0)
 
 """
@@ -59,7 +58,7 @@ ATTRIBUTES = ['celltype', 'organ']
 
 # Functions
 def matrices_figures(X: np.ndarray, true_labels: np.ndarray, df: pd.DataFrame, attributes_map, attribute,
-               title: str, save_path: str) -> np.ndarray:
+                     title: str, save_path: str) -> np.ndarray:
     """
     Evaluate the latent space clustering, comparing known labels to kmeans clustering using the Rand index score
     :param X: The latent space data
@@ -188,7 +187,7 @@ def uniform_labelings_scores_plot(X, true_labels, title, save_path):
     plt.show()
 
 
-def get_kmeans_score(X, true_labels, n_clusters_range = np.arange(2, 16).astype(int)):
+def get_kmeans_score(X, true_labels, n_clusters_range=np.arange(2, 16).astype(int)):
     scores_best_kmeans = []
     for score_name, score_func in score_funcs:
         scores, best_kmeans = kmeans_scores(X, true_labels, score_func, n_clusters_range)
@@ -196,8 +195,15 @@ def get_kmeans_score(X, true_labels, n_clusters_range = np.arange(2, 16).astype(
         scores_best_kmeans.append(best_kmeans)
     return pd.DataFrame(scores_best_kmeans)
 
-def kmeans_scores(X, true_labels, score_func, n_clusters_range, n_runs=5):
+
+def kmeans_scores(X, true_labels, score_func, n_clusters_range, n_runs=5, save_path=""):
     scores = np.zeros((len(n_clusters_range), n_runs))
+    all_kmeans = {
+        "id": [],
+        "n_clusters": [],
+        "score": [],
+        "labels": [],
+    }
     best_kmeans = {
         "labels": [],
         "n_clusters": 0,
@@ -209,6 +215,11 @@ def kmeans_scores(X, true_labels, score_func, n_clusters_range, n_runs=5):
             km = KMeans(n_clusters=n_clusters, n_init='auto', random_state=42)
             labels_kmeans = km.fit_predict(X)
             score = score_func(true_labels, labels_kmeans)
+            index = (i * n_runs) + j
+            all_kmeans['id'].append(index)
+            all_kmeans['n_clusters'].append(n_clusters)
+            all_kmeans['score'].append(score)
+            all_kmeans['labels'].append(labels_kmeans)
             if score > max_score:
                 max_score = score
                 best_kmeans['labels'] = labels_kmeans
@@ -216,6 +227,8 @@ def kmeans_scores(X, true_labels, score_func, n_clusters_range, n_runs=5):
                 best_kmeans['km'] = km
             scores[i, j] = score
     best_kmeans['score'] = max_score
+    all_kmeans = pd.DataFrame(all_kmeans)
+    all_kmeans.to_csv(save_path + "kmeans_models_scores.csv")
     return scores, best_kmeans
 
 
@@ -227,7 +240,7 @@ def kmeans_scores_plot(X, true_labels, title, save_path):
     names = []
     ari_best_kmeans = None
     for marker, (score_name, score_func) in zip("d^vx.+*", score_funcs):
-        scores, best_kmeans = kmeans_scores(X, true_labels, score_func, n_clusters_range)
+        scores, best_kmeans = kmeans_scores(X, true_labels, score_func, n_clusters_range, save_path)
         if score_func == metrics.adjusted_rand_score:
             ari_best_kmeans = best_kmeans
         plots.append(
@@ -268,7 +281,9 @@ def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map, a
         # Determine the most common label for each label in best_kmeans['labels']
         attribute_key = attribute + '_key'
         ground_truth_labels = df[attribute_key]
-        label_counts = {label: Counter([ground_truth_labels[i] for i in range(len(best_kmeans['labels'])) if best_kmeans['labels'][i] == label]) for label in
+        label_counts = {label: Counter(
+            [ground_truth_labels[i] for i in range(len(best_kmeans['labels'])) if best_kmeans['labels'][i] == label])
+                        for label in
                         set(best_kmeans['labels'])}
         new_labels = [label_counts[label].most_common(1)[0][0] for label in best_kmeans['labels']]
         property_ = 'kmeans_' + attribute
