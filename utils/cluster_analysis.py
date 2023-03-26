@@ -199,6 +199,7 @@ def get_kmeans_score(X, true_labels, n_clusters_range=np.arange(2, 16).astype(in
 def kmeans_scores(X, true_labels, score_func, n_clusters_range, n_runs=5, id_=1, save_path=""):
     scores = np.zeros((len(n_clusters_range), n_runs))
     all_kmeans = {
+        "id_biolord": [],
         "id": [],
         "n_clusters": [],
         "score": [],
