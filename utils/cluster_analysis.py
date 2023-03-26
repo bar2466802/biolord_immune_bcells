@@ -217,6 +217,7 @@ def kmeans_scores(X, true_labels, score_func, n_clusters_range, n_runs=5, id_=1,
             score = score_func(true_labels, labels_kmeans)
             index = (i * n_runs) + j
             all_kmeans['id'].append(index)
+            all_kmeans['id_biolord'].append(id_)
             all_kmeans['n_clusters'].append(n_clusters)
             all_kmeans['score'].append(score)
             all_kmeans['labels'].append(labels_kmeans)
