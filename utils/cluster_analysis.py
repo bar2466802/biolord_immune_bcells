@@ -187,10 +187,10 @@ def uniform_labelings_scores_plot(X, true_labels, title, save_path):
     plt.show()
 
 
-def get_kmeans_score(X, true_labels, n_clusters_range=np.arange(2, 16).astype(int)):
+def get_kmeans_score(X, true_labels, n_clusters_range=np.arange(2, 16).astype(int), save_path=""):
     scores_best_kmeans = []
     for score_name, score_func in score_funcs:
-        scores, best_kmeans = kmeans_scores(X, true_labels, score_func, n_clusters_range)
+        scores, best_kmeans = kmeans_scores(X, true_labels, score_func, n_clusters_range, save_path=save_path)
         best_kmeans['score_name'] = score_name
         scores_best_kmeans.append(best_kmeans)
     return pd.DataFrame(scores_best_kmeans)
