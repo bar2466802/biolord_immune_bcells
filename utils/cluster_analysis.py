@@ -187,7 +187,7 @@ def uniform_labelings_scores_plot(X, true_labels, title, save_path):
     plt.show()
 
 
-def get_kmeans_score(X, true_labels, n_clusters_range=np.arange(2, 16).astype(int), id_=1, save_path=""):
+def get_kmeans_score(X, true_labels, n_clusters_range=np.arange(2, 16).astype(int), id_=None, save_path=""):
     scores_best_kmeans = []
     for score_name, score_func in score_funcs:
         scores, best_kmeans = kmeans_scores(X, true_labels, score_name, score_func, n_clusters_range, id_=id_, save_path=save_path)
@@ -196,7 +196,7 @@ def get_kmeans_score(X, true_labels, n_clusters_range=np.arange(2, 16).astype(in
     return pd.DataFrame(scores_best_kmeans)
 
 
-def kmeans_scores(X, true_labels, score_name, score_func, n_clusters_range, n_runs=5, id_=1, save_path=""):
+def kmeans_scores(X, true_labels, score_name, score_func, n_clusters_range, n_runs=5, id_=None, save_path=""):
     scores = np.zeros((len(n_clusters_range), n_runs))
     all_kmeans = {
         "id_biolord": [],
