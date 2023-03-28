@@ -11,7 +11,10 @@ from sklearn.cluster import DBSCAN
 from sklearn import metrics
 import seaborn as sns
 import colorcet as cc
+# import mplscience
+# mplscience.set_style()
 from math import ceil
+import matplotlib
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_samples, silhouette_score
@@ -19,7 +22,7 @@ from sklearn.metrics import rand_score
 from yellowbrick.cluster import SilhouetteVisualizer  # to continue here
 from collections import Counter
 from formatters import *
-
+matplotlib.use('Agg')
 rng = np.random.RandomState(0)
 
 """
@@ -190,7 +193,8 @@ def uniform_labelings_scores_plot(X, true_labels, title, save_path):
 def get_kmeans_score(X, true_labels, n_clusters_range=np.arange(2, 16).astype(int), id_=None, save_path=""):
     scores_best_kmeans = []
     for score_name, score_func in score_funcs:
-        scores, best_kmeans = kmeans_scores(X, true_labels, score_name, score_func, n_clusters_range, id_=id_, save_path=save_path)
+        scores, best_kmeans = kmeans_scores(X, true_labels, score_name, score_func, n_clusters_range, id_=id_,
+                                            save_path=save_path)
         best_kmeans['score_name'] = score_name
         scores_best_kmeans.append(best_kmeans)
     return pd.DataFrame(scores_best_kmeans)
@@ -291,8 +295,8 @@ def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map, a
         ground_truth_labels = df[attribute_key]
         label_counts = {label: Counter(
             [ground_truth_labels[i] for i in range(len(best_kmeans['labels'])) if best_kmeans['labels'][i] == label])
-                        for label in
-                        set(best_kmeans['labels'])}
+            for label in
+            set(best_kmeans['labels'])}
         new_labels = [label_counts[label].most_common(1)[0][0] for label in best_kmeans['labels']]
         property_ = 'kmeans_' + attribute
         df[property_] = new_labels
@@ -401,8 +405,17 @@ def print_indexes(list_):
             map_indexes[str(i)] = value
     return map_indexes
 
+    # generate a boxplot to see the data distribution by treatments. Using boxplot, we can
+    # easily detect the differences between different treatments
+
 
 def silhouette(km, X):
     visualizer = SilhouetteVisualizer(km, colors='yellowbrick')
     visualizer.fit(X)  # Fit the data to the visualizer
     visualizer.show()  # Finalize and render the figure
+
+
+if __name__ == '__main__':
+    anova()
+
+    print("The End")
