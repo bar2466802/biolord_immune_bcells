@@ -1,4 +1,8 @@
-biolord~=0.0.1
-numpy~=1.24.2
+numpy~=1.22.4
 pandas~=1.5.3
-scikit-learn~=1.2.2
+biolord~=0.0.1
+seaborn~=0.11.2
+colorcet~=3.0.1
+matplotlib~=3.6.3
+scikit-learn~=1.2.1
+yellowbrick~=1.5
