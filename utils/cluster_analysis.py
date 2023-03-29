@@ -210,6 +210,7 @@ def kmeans_scores(X, true_labels, score_name, score_func, n_clusters_range, n_ru
         "score_name": [],
         "score": [],
         "labels": [],
+        "true_labels": []
     }
     best_kmeans = {
         "labels": [],
