@@ -229,6 +229,7 @@ def kmeans_scores(X, true_labels, score_name, score_func, n_clusters_range, n_ru
             all_kmeans['score_name'].append(score_name)
             all_kmeans['score'].append(score)
             all_kmeans['labels'].append(labels_kmeans)
+            all_kmeans['true_labels'].append(true_labels)
             if score > max_score:
                 max_score = score
                 best_kmeans['labels'] = labels_kmeans
