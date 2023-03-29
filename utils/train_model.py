@@ -147,7 +147,7 @@ def train_dataset():
         "cosine_scheduler": True,
         "scheduler_final_lr": 1e-5,
     }
-    wandb.init(project="biolord_bcells_train", entity="biolord_immune_bcells", config=trainer_params)
+    wandb.init(project="biolord_bcells_train", entity="biolord", config=trainer_params)
     wandb.log({'n_latent_attribute_categorical': args.n_latent_attribute_categorical})
     wandb.log({'reconstruction_penalty': args.reconstruction_penalty})
     wandb.log({'unknown_attribute_penalty': args.unknown_attribute_penalty})
