@@ -11,7 +11,7 @@ sys.path.append(module_path)
 DATA_DIR = "../data/"
 SAVE_DIR = "../output/"
 FIG_DIR = "../figures/"
-LOGS_CSV = SAVE_DIR + "trained_models_scores.csv"
+LOGS_CSV = SAVE_DIR + "trained_model_scores.csv"
 
 arr_n_latent_attribute_categorical = 2 ** np.arange(4, 8)
 arr_reconstruction_penalty = [1e-1, 1e1, 1e2, 1e3]
@@ -26,7 +26,7 @@ parms_combos = itertools.product(arr_n_latent_attribute_categorical,
 for i, (n_latent_attribute_categorical, reconstruction_penalty, unknown_attribute_penalty, unknown_attribute_noise_param) in enumerate(parms_combos):
     # trying to recreate this command: srun --gres=gpu:1,vmem:10g --mem=100g -c2 --time=20:00:00 --pty $SHELL
     cmdline0 = ['sbatch', '--gres=gpu:1', '--mem=100gb', '-c2', '--time=20:00:00',
-                f'--output={DATA_DIR}/logs/train_model-{i}.log',
+                f'--output=../logs/train_model-{i}.log',
                 f'--job-name=train-{i}',
                 'run_sbatch_train.sh',
                 str(n_latent_attribute_categorical),

@@ -18,22 +18,24 @@ import itertools
 import matplotlib.pyplot as plt
 import biolord
 import wandb
+import os
+import sys
 
-from utils import (
-    cluster_analysis,
-    formatters
-)
+sys.path.append("/cs/usr/bar246802/bar246802/SandBox2023/biolord_immune_bcells/utils") # add utils
+sys.path.append("/cs/usr/bar246802/bar246802/SandBox2023/biolord") # set path)
+from cluster_analysis import *
+from formatters import *
 
 DATA_DIR = "../data/"
 SAVE_DIR = "../output/"
 FIG_DIR = "../figures/"
-LOGS_CSV = SAVE_DIR + "trained_models_scores.csv"
+LOGS_CSV = SAVE_DIR + "trained_model_scores.csv"
 
 adata = sc.read(DATA_DIR + "biolord_immune_bcells_bm.h5ad")
 
 
 def cluster_evaluate(model, id_, attributes = ['celltype', 'organ']):
-    transf_embeddings_attributes, df = formatters.get_transf_embeddings_attributes(model)
+    transf_embeddings_attributes, df = get_transf_embeddings_attributes(model)
     all_scores = None
     for attribute in attributes:
         ground_truth_labels = np.array(df[attribute + '_key'])
@@ -41,7 +43,7 @@ def cluster_evaluate(model, id_, attributes = ['celltype', 'organ']):
         print(f'For attribute {attribute} the # of unique true labels is: {len(ground_truth_unique_labels)}')
         path = SAVE_DIR + attribute + "_"
         n_clusters_range = np.arange(2, 16).astype(int)
-        scores =  cluster_analysis.get_kmeans_score(transf_embeddings_attributes, ground_truth_labels, n_clusters_range=n_clusters_range, id_=id_, save_path=path)
+        scores = get_kmeans_score(transf_embeddings_attributes, ground_truth_labels, n_clusters_range=n_clusters_range, id_=id_, save_path=path)
         scores['attribute'] = attribute
         if all_scores is not None:
             all_scores = pd.concat([all_scores, scores], ignore_index=True)
@@ -102,9 +104,9 @@ def train_dataset():
     """
     parser = argparse.ArgumentParser(description=".")
     parser.add_argument("--n_latent_attribute_categorical", type=int)
-    parser.add_argument("--reconstruction_penalty", type=int)
-    parser.add_argument("--unknown_attribute_penalty", type=int)
-    parser.add_argument("--unknown_attribute_noise_param", type=int)
+    parser.add_argument("--reconstruction_penalty", type=float)
+    parser.add_argument("--unknown_attribute_penalty", type=float)
+    parser.add_argument("--unknown_attribute_noise_param", type=float)
     parser.add_argument("--id_", type=int)
     args = parser.parse_args()
 
@@ -145,7 +147,7 @@ def train_dataset():
         "cosine_scheduler": True,
         "scheduler_final_lr": 1e-5,
     }
-    wandb.init(project=args.project_name, entity="biolord_immune_bcells", config=trainer_params)
+    wandb.init(project="biolord_bcells_train", entity="biolord_immune_bcells", config=trainer_params)
     wandb.log({'n_latent_attribute_categorical': args.n_latent_attribute_categorical})
     wandb.log({'reconstruction_penalty': args.reconstruction_penalty})
     wandb.log({'unknown_attribute_penalty': args.unknown_attribute_penalty})
