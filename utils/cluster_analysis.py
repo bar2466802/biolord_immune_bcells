@@ -15,6 +15,7 @@ import colorcet as cc
 # mplscience.set_style()
 from math import ceil
 import matplotlib
+from os.path import exists
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_samples, silhouette_score
@@ -237,10 +238,11 @@ def kmeans_scores(X, true_labels, score_name, score_func, n_clusters_range, n_ru
     best_kmeans['score'] = max_score
     all_kmeans = pd.DataFrame(all_kmeans)
     # create only if this is the 1st model and 1st score func, otherwise append
-    if id_ == 1 and (score_funcs.index((score_name, score_func)) == 0):
-        all_kmeans.to_csv(save_path + "kmeans_models_scores.csv")
+    csv_name = save_path + "kmeans_models_scores.csv"
+    if id_ == 1 or not exists(csv_name):
+        all_kmeans.to_csv(csv_name)
     else:
-        all_kmeans.to_csv(save_path + "kmeans_models_scores.csv", mode='a', header=False)
+        all_kmeans.to_csv(csv_name, mode='a', header=False)
     return scores, best_kmeans
 
 
