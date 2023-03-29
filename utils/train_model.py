@@ -20,11 +20,24 @@ import biolord
 import wandb
 import os
 import sys
+import random
 
 sys.path.append("/cs/usr/bar246802/bar246802/SandBox2023/biolord_immune_bcells/utils") # add utils
 sys.path.append("/cs/usr/bar246802/bar246802/SandBox2023/biolord") # set path)
 from cluster_analysis import *
 from formatters import *
+
+print(f"PyTorch version: {torch.__version__}")
+# Set the device
+device = "gpu" if torch.backends.cuda.is_built() else "cpu"
+print(f"Using device: {device}")
+
+from tqdm import tqdm
+tqdm(disable=True, total=0)  # initialise internal lock
+
+import mplscience
+mplscience.set_style()
+plt.rcParams['legend.scatterpoints'] = 1
 
 DATA_DIR = "../data/"
 SAVE_DIR = "../output/"
@@ -32,7 +45,7 @@ FIG_DIR = "../figures/"
 LOGS_CSV = SAVE_DIR + "trained_model_scores.csv"
 
 adata = sc.read(DATA_DIR + "biolord_immune_bcells_bm.h5ad")
-
+random.seed(42)
 
 def cluster_evaluate(model, id_, attributes = ['celltype', 'organ']):
     transf_embeddings_attributes, df = get_transf_embeddings_attributes(model)
