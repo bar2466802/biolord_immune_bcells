@@ -81,7 +81,6 @@ def matrices_figures(X: np.ndarray, true_labels: np.ndarray, df: pd.DataFrame, a
         "Homogeneity": [],
         "Completeness": [],
         "V-measure": [],
-        "Homogeneity": [],
         "Adjusted Rand Index": [],
         "Adjusted Mutual Information": [],
         "Silhouette Coefficient": []
@@ -420,6 +419,5 @@ def silhouette(km, X):
 
 
 if __name__ == '__main__':
-    anova()
-
+    # anova()
     print("The End")

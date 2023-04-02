@@ -3,15 +3,12 @@ import os
 import sys
 import numpy as np
 import itertools
-
+import settings
 
 module_path = os.path.dirname(os.path.dirname(os.path.abspath(os.path.join('..'))))
 sys.path.append(module_path)
 
-DATA_DIR = "../data/"
-SAVE_DIR = "../output/"
-LOGS_DIR = "../logs/"
-FIG_DIR = "../figures/"
+settings.init()
 
 arr_n_latent_attribute_categorical = 2 ** np.arange(4, 8)
 arr_reconstruction_penalty = [1e-1, 1e1, 1e2, 1e3]
@@ -29,12 +26,14 @@ parms_combos = itertools.product(arr_n_latent_attribute_categorical,
                                  arr_unknown_attribute_noise_param)
 
 # create log folder for curren run
-curren_dirs_names = [name for name in os.listdir(SAVE_DIR) if os.path.isdir(name) and str(name).isnumeric()]
+curren_dirs_names = [name for name in os.listdir(settings.SAVE_DIR) if os.path.isdir(name) and str(name).isnumeric()]
 max_folder_name = np.max(curren_dirs_names)
 new_dir_name = str(max_folder_name + 1)
-for dir_path in [SAVE_DIR, FIG_DIR, LOGS_DIR]:
+for dir_path in [settings.SAVE_DIR, settings.FIG_DIR, settings.LOGS_DIR]:
     if not os.path.exists(dir_path + new_dir_name):
         os.makedirs(dir_path + new_dir_name)
+
+settings.init_adata(new_dir_name)
 
 for i, (n_latent_attribute_categorical, reconstruction_penalty, unknown_attribute_penalty, unknown_attribute_noise_param) in enumerate(parms_combos):
     # trying to recreate this command: srun --gres=gpu:1,vmem:10g --mem=100g -c2 --time=20:00:00 --pty $SHELL

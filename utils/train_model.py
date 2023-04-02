@@ -20,7 +20,7 @@ import biolord
 import wandb
 import os
 import sys
-import random
+import settings
 
 sys.path.append("/cs/usr/bar246802/bar246802/SandBox2023/biolord_immune_bcells/utils")  # add utils
 sys.path.append("/cs/usr/bar246802/bar246802/SandBox2023/biolord")  # set path)
@@ -40,15 +40,6 @@ import mplscience
 
 mplscience.set_style()
 plt.rcParams['legend.scatterpoints'] = 1
-
-DATA_DIR = "../data/"
-SAVE_DIR = "../output/"
-LOGS_DIR = "../logs/"
-FIG_DIR = "../figures/"
-LOGS_CSV = SAVE_DIR
-
-adata = sc.read(DATA_DIR + "biolord_immune_bcells_bm.h5ad")
-random.seed(42)
 
 
 def cluster_evaluate(model, id_, attributes=['celltype', 'organ']):
@@ -76,28 +67,27 @@ def cluster_evaluate(model, id_, attributes=['celltype', 'organ']):
 
 def split_adata_into_train_test():
     from sklearn.model_selection import train_test_split
-    adata.obs['split'] = 'nan'
-    ood_samples = adata.obs.sample(frac=0.0025, random_state=42).index
-    adata.obs.loc[ood_samples, "split"] = 'ood'
+    settings.adata.obs['split'] = 'nan'
+    ood_samples = settings.adata.obs.sample(frac=0.0025, random_state=42).index
+    settings.adata.obs.loc[ood_samples, "split"] = 'ood'
 
-    adata_idx = adata.obs_names[adata.obs["split"] != 'ood']
+    adata_idx = settings.adata.obs_names[settings.adata.obs["split"] != 'ood']
     adata_idx_train, adata_idx_test = train_test_split(adata_idx, test_size=0.1, random_state=42)
-    adata.obs.loc[adata_idx_train, "split"] = 'train'
-    adata.obs.loc[adata_idx_test, "split"] = 'test'
-    a = adata.obs['split'].value_counts()
+    settings.adata.obs.loc[adata_idx_train, "split"] = 'train'
+    settings.adata.obs.loc[adata_idx_test, "split"] = 'test'
+    a = settings.adata.obs['split'].value_counts()
     print("Simaple value count of train, test, OOD:")
     print(a)
     print("\n")
     print("Train, test, OOD by percentage:")
-    p = adata.obs['split'].value_counts(normalize=True) * 100
+    p = settings.adata.obs['split'].value_counts(normalize=True) * 100
     print(p)
 
 
 def train_model(module_params, trainer_params):
     # before each train we wish to re-split the data to make sure we are not biased to a certain split
-    split_adata_into_train_test()
     model = biolord.Biolord(
-        adata=adata,
+        adata=settings.adata,
         n_latent=32,
         model_name="immune_bcells",
         module_params=module_params,
@@ -121,7 +111,6 @@ def train_dataset():
     """
     Read arguments if this script is called from a terminal.
     """
-    global LOGS_CSV, SAVE_DIR, FIG_DIR, LOGS_DIR
     parser = argparse.ArgumentParser(description=".")
     parser.add_argument("--n_latent_attribute_categorical", type=int)
     parser.add_argument("--reconstruction_penalty", type=float)
@@ -134,18 +123,11 @@ def train_dataset():
     print(
         f'n_latent_attribute_categorical = {args.n_latent_attribute_categorical}, \nreconstruction_penalty = {args.reconstruction_penalty}, \nunknown_attribute_penalty = {args.unknown_attribute_penalty}, \nunknown_attribute_noise_param = {args.unknown_attribute_noise_param}, \nid_= {args.id_}'
     )
-
-    for dir_path in [SAVE_DIR, FIG_DIR, LOGS_DIR]:
-        if not os.path.exists(dir_path + args.folder):
-            os.makedirs(dir_path + args.folder)
-
-    SAVE_DIR += args.folder + '/'
-    FIG_DIR += args.folder + '/'
-    LOGS_DIR += args.folder + '/'
-    LOGS_CSV += args.folder + "/trained_model_scores.csv"
+    settings.init_folders(args.folder)
+    settings.adata = sc.read(settings.DATA_DIR + f"/{args.folder}_biolord_immune_bcells_bm.h5ad")
 
     biolord.Biolord.setup_anndata(
-        adata,
+        settings.adata,
         categorical_attributes_keys=["celltype", "organ", "age"],
         retrieval_attribute_key="sex",
     )
@@ -197,10 +179,10 @@ def train_dataset():
             f"attribute_{score_row['attribute']}_score_{score_row['score_name']}": score_row['score'],
         })
 
-    if args.id_ == 1 or not exists(LOGS_CSV):
-        scores.to_csv(LOGS_CSV)
+    if args.id_ == 1 or not exists(settings.LOGS_CSV):
+        scores.to_csv(settings.LOGS_CSV)
     else:
-        scores.to_csv(LOGS_CSV, mode='a', header=False)
+        scores.to_csv(settings.LOGS_CSV, mode='a', header=False)
 
 
 if __name__ == "__main__":
