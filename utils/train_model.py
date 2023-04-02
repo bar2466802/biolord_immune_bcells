@@ -43,7 +43,7 @@ plt.rcParams['legend.scatterpoints'] = 1
 
 
 def cluster_evaluate(model, id_, attributes=['celltype', 'organ']):
-    transf_embeddings_attributes, df, attributes_map_rev = get_transf_embeddings_attributes(model)
+    transf_embeddings_attributes, df, df_attributes_map = get_transf_embeddings_attributes(model)
     all_scores = None
     for attribute in attributes:
         ground_truth_labels = np.array(df[attribute + '_key'])
@@ -54,14 +54,15 @@ def cluster_evaluate(model, id_, attributes=['celltype', 'organ']):
         scores = get_kmeans_score(transf_embeddings_attributes, ground_truth_labels, n_clusters_range=n_clusters_range,
                                   id_=id_, save_path=path)
         scores['attribute'] = attribute
-        scores['attribute_map'] = attributes_map_rev
         if all_scores is not None:
             all_scores = pd.concat([all_scores, scores], ignore_index=True)
         else:
             all_scores = scores
-    cols = ['attribute', 'score_name', 'score', 'n_clusters', 'attribute_map']
+    cols = ['attribute', 'score_name', 'score', 'n_clusters']
     all_scores = all_scores[cols]
     print(all_scores)
+    attributes_map_name = settings.SAVE_DIR + f"ATTRIBUTES_MAP_{id_}.csv"
+    df_attributes_map.to_csv(attributes_map_name)
     return all_scores
 
 
@@ -106,7 +107,7 @@ def train_dataset():
         f'n_latent_attribute_categorical = {args.n_latent_attribute_categorical}, \nreconstruction_penalty = {args.reconstruction_penalty}, \nunknown_attribute_penalty = {args.unknown_attribute_penalty}, \nunknown_attribute_noise_param = {args.unknown_attribute_noise_param}, \nid_= {args.id_}, \nfolder = {args.folder}'
     )
     settings.init_folders(args.folder)
-    settings.adata = sc.read(settings.DATA_DIR + f"/{args.folder}_biolord_immune_bcells_bm.h5ad")
+    settings.adata = sc.read(settings.DATA_DIR + f"{args.folder}_biolord_immune_bcells_bm.h5ad")
 
     biolord.Biolord.setup_anndata(
         settings.adata,

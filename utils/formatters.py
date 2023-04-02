@@ -103,9 +103,17 @@ def get_transf_embeddings_attributes(model):
     for attribute_ in transf_embeddings_attributes_ind:
         df[attribute_ + "_key"] = df[attribute_].map(attributes_map[attribute_])
 
-    attributes_map_rev = {}
+    df_attributes_map = {
+        "attribute": [],
+        "key": [],
+        "value": []
+    }
     for key in attributes_map:
-        attributes_map_rev[key] = {v: k for k, v in attributes_map[key].items()}
-
+        for k, v in attributes_map[key].items():
+            df_attributes_map['attribute'].append(key)
+            df_attributes_map['key'].append(k)
+            df_attributes_map['value'].append(v)
+    df_attributes_map = pd.DataFrame(df_attributes_map)
+    print(f"df_attributes_map = {df_attributes_map}")
     # attributes_map_rev = pd.DataFrame(attributes_map_rev)
-    return transf_embeddings_attributes, df, attributes_map_rev
+    return transf_embeddings_attributes, df, df_attributes_map

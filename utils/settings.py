@@ -15,6 +15,7 @@ def init():
 def init_adata(new_dir_name="1"):
     global DATA_DIR, SAVE_DIR, LOGS_DIR, FIG_DIR, DIR
     global adata
+    DATA_DIR = "../data/"
     SAVE_DIR = f"../output/{new_dir_name}/"
     LOGS_DIR = f"../logs/{new_dir_name}/"
     FIG_DIR = f"../figures/{new_dir_name}/"
@@ -22,14 +23,14 @@ def init_adata(new_dir_name="1"):
     adata = sc.read(DATA_DIR + "biolord_immune_bcells_bm.h5ad")
     # re-split the adata file
     split_adata_into_train_test()
-    adata.write(DATA_DIR + f"/{new_dir_name}_biolord_immune_bcells_bm.h5ad")
+    adata.write(DATA_DIR + f"{new_dir_name}_biolord_immune_bcells_bm.h5ad")
 
 
 def init_folders(new_dir_name="1"):
     global DATA_DIR, SAVE_DIR, LOGS_DIR, FIG_DIR, DIR, LOGS_CSV
     print(f'init_folders.new_dir_name = {new_dir_name}')
     new_dir_name = str(new_dir_name)
-    DATA_DIR = f"../data/{new_dir_name}/"
+    DATA_DIR = "../data/"
     SAVE_DIR = f"../output/{new_dir_name}/"
     LOGS_DIR = f"../logs/{new_dir_name}/"
     FIG_DIR = f"../figures/{new_dir_name}/"
