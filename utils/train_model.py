@@ -49,7 +49,7 @@ def cluster_evaluate(model, id_, attributes=['celltype', 'organ']):
         ground_truth_labels = np.array(df[attribute + '_key'])
         ground_truth_unique_labels = list(set(ground_truth_labels))
         print(f'For attribute {attribute} the # of unique true labels is: {len(ground_truth_unique_labels)}')
-        path = SAVE_DIR + attribute + "_"
+        path = settings.SAVE_DIR + attribute + "_"
         n_clusters_range = np.arange(2, 16).astype(int)
         scores = get_kmeans_score(transf_embeddings_attributes, ground_truth_labels, n_clusters_range=n_clusters_range,
                                   id_=id_, save_path=path)
