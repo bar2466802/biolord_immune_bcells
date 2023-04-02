@@ -26,9 +26,15 @@ parms_combos = itertools.product(arr_n_latent_attribute_categorical,
                                  arr_unknown_attribute_noise_param)
 
 # create log folder for curren run
-curren_dirs_names = [name for name in os.listdir(settings.SAVE_DIR) if os.path.isdir(name) and str(name).isnumeric()]
-max_folder_name = np.max(curren_dirs_names)
-new_dir_name = str(max_folder_name + 1)
+# curren_dirs_names = [name for name in os.listdir(settings.SAVE_DIR) if os.path.isdir(name) and str(name).isnumeric()]
+curren_dirs_names = np.array([name for name in os.listdir(settings.SAVE_DIR) if str(name).isnumeric()], dtype=int)
+if len(curren_dirs_names) > 0:
+    print(f"curren_dirs_names = {curren_dirs_names}")
+    max_folder_name = curren_dirs_names.max()
+    new_dir_name = str(max_folder_name + 1)
+else:
+    new_dir_name = "1"
+
 for dir_path in [settings.SAVE_DIR, settings.FIG_DIR, settings.LOGS_DIR]:
     if not os.path.exists(dir_path + new_dir_name):
         os.makedirs(dir_path + new_dir_name)

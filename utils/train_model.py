@@ -65,25 +65,6 @@ def cluster_evaluate(model, id_, attributes=['celltype', 'organ']):
     return all_scores
 
 
-def split_adata_into_train_test():
-    from sklearn.model_selection import train_test_split
-    settings.adata.obs['split'] = 'nan'
-    ood_samples = settings.adata.obs.sample(frac=0.0025, random_state=42).index
-    settings.adata.obs.loc[ood_samples, "split"] = 'ood'
-
-    adata_idx = settings.adata.obs_names[settings.adata.obs["split"] != 'ood']
-    adata_idx_train, adata_idx_test = train_test_split(adata_idx, test_size=0.1, random_state=42)
-    settings.adata.obs.loc[adata_idx_train, "split"] = 'train'
-    settings.adata.obs.loc[adata_idx_test, "split"] = 'test'
-    a = settings.adata.obs['split'].value_counts()
-    print("Simaple value count of train, test, OOD:")
-    print(a)
-    print("\n")
-    print("Train, test, OOD by percentage:")
-    p = settings.adata.obs['split'].value_counts(normalize=True) * 100
-    print(p)
-
-
 def train_model(module_params, trainer_params):
     # before each train we wish to re-split the data to make sure we are not biased to a certain split
     model = biolord.Biolord(
@@ -117,11 +98,12 @@ def train_dataset():
     parser.add_argument("--unknown_attribute_penalty", type=float)
     parser.add_argument("--unknown_attribute_noise_param", type=float)
     parser.add_argument("--id_", type=int)
-    parser.add_argument("--folder", type=str)
+    parser.add_argument("--folder", type=int)
     args = parser.parse_args()
     print('*****************************************************************************')
+    print(f'args = {args}')
     print(
-        f'n_latent_attribute_categorical = {args.n_latent_attribute_categorical}, \nreconstruction_penalty = {args.reconstruction_penalty}, \nunknown_attribute_penalty = {args.unknown_attribute_penalty}, \nunknown_attribute_noise_param = {args.unknown_attribute_noise_param}, \nid_= {args.id_}'
+        f'n_latent_attribute_categorical = {args.n_latent_attribute_categorical}, \nreconstruction_penalty = {args.reconstruction_penalty}, \nunknown_attribute_penalty = {args.unknown_attribute_penalty}, \nunknown_attribute_noise_param = {args.unknown_attribute_noise_param}, \nid_= {args.id_}, \nfolder = {args.folder}'
     )
     settings.init_folders(args.folder)
     settings.adata = sc.read(settings.DATA_DIR + f"/{args.folder}_biolord_immune_bcells_bm.h5ad")
@@ -186,4 +168,5 @@ def train_dataset():
 
 
 if __name__ == "__main__":
+    print(sys.argv)
     train_dataset()
