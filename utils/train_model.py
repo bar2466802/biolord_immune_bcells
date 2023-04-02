@@ -136,8 +136,8 @@ def train_dataset():
     )
 
     for dir_path in [SAVE_DIR, FIG_DIR, LOGS_DIR]:
-        if not os.path.exists(dir_path + new_dir_name):
-            os.makedirs(dir_path + new_dir_name)
+        if not os.path.exists(dir_path + args.folder):
+            os.makedirs(dir_path + args.folder)
 
     SAVE_DIR += args.folder + '/'
     FIG_DIR += args.folder + '/'
