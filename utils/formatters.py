@@ -45,6 +45,7 @@ def switch_to_organ_fullname(col):
     )
     return col
 
+
 def get_transf_embeddings_attributes(model):
     attributes_map = {
         "celltype": model.categorical_attributes_map["celltype"],
@@ -102,4 +103,9 @@ def get_transf_embeddings_attributes(model):
     for attribute_ in transf_embeddings_attributes_ind:
         df[attribute_ + "_key"] = df[attribute_].map(attributes_map[attribute_])
 
-    return transf_embeddings_attributes, df
+    attributes_map_rev = {}
+    for key in attributes_map:
+        attributes_map_rev[key] = {v: k for k, v in attributes_map[key].items()}
+
+    # attributes_map_rev = pd.DataFrame(attributes_map_rev)
+    return transf_embeddings_attributes, df, attributes_map_rev
