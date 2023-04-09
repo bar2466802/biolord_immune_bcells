@@ -320,7 +320,6 @@ def get_kmeans_score(X, df_true_labels, n_clusters_range=np.arange(8, 12).astype
 def kmeans_scores(X, df_true_labels, n_clusters_range, id_=None, save_path=""):
     all_kmeans = {
         "id_biolord": [],
-        "id": [],
         "n_clusters": [],
         "labels": [],
         "robustness_mean": [],
