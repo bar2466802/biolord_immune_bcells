@@ -156,10 +156,10 @@ def train_dataset():
     scores['unknown_attribute_noise_param'] = args.unknown_attribute_noise_param
     scores['id_'] = args.id_
     scores = pd.DataFrame(scores)
-    for index, score_row in scores.iterrows():
-        wandb.log({
-            f"attribute_{score_row['attribute']}_score_{score_row['score_name']}": score_row['score'],
-        })
+    # for index, score_row in scores.iterrows():
+    #     wandb.log({
+    #         f"attribute_{score_row['attribute']}_score_{score_row['score_name']}": score_row['score'],
+    #     })
 
     if args.id_ == 1 or not exists(settings.LOGS_CSV):
         scores.to_csv(settings.LOGS_CSV)
