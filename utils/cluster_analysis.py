@@ -330,7 +330,7 @@ def kmeans_scores(X, df_true_labels, n_clusters_range, id_=None, save_path=""):
         "score_robustness_std": []
     }
 
-    for i, n_clusters in enumerate(n_clusters_range):
+    for n_clusters in n_clusters_range:
         all_kmeans['id_biolord'].append(id_)
         all_kmeans['n_clusters'].append(n_clusters)
         # fit the k means model over the latent space
