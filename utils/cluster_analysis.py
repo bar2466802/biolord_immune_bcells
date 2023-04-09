@@ -257,7 +257,11 @@ def robustness(id_, kmeans_labels, true_labels_celltype, true_labels_organ):
     print(f'for n_clusters = {number_of_clusters}\nmost_common_new_labels = {meaningful_new_labels}')
     print(df_robustness)
     csv_name = settings.SAVE_DIR + f"relabeling_{id_}.csv"
-    df_robustness.to_csv(csv_name)
+
+    if not exists(csv_name):
+        df_robustness.to_csv(csv_name)
+    else:
+        df_robustness.to_csv(csv_name, mode='a', header=False)
 
     return df_robustness['value'].mean(), df_robustness['value'].std()
 
