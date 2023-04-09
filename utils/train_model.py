@@ -44,26 +44,25 @@ plt.rcParams['legend.scatterpoints'] = 1
 
 def cluster_evaluate(model, id_, attributes=['celltype', 'organ']):
     transf_embeddings_attributes, df, df_attributes_map = get_transf_embeddings_attributes(model)
-    all_scores = None
+    attributes_ground_truth_labels = {'attributes': [], 'true_labels': []}
     for attribute in attributes:
         ground_truth_labels = np.array(df[attribute + '_key'])
+        attributes_ground_truth_labels['attributes'].append(attribute)
+        attributes_ground_truth_labels['true_labels'].append(ground_truth_labels)
         ground_truth_unique_labels = list(set(ground_truth_labels))
         print(f'For attribute {attribute} the # of unique true labels is: {len(ground_truth_unique_labels)}')
-        path = settings.SAVE_DIR + attribute + "_"
-        n_clusters_range = np.arange(2, 16).astype(int)
-        scores = get_kmeans_score(transf_embeddings_attributes, ground_truth_labels, n_clusters_range=n_clusters_range,
-                                  id_=id_, save_path=path)
-        scores['attribute'] = attribute
-        if all_scores is not None:
-            all_scores = pd.concat([all_scores, scores], ignore_index=True)
-        else:
-            all_scores = scores
-    cols = ['attribute', 'score_name', 'score', 'n_clusters']
-    all_scores = all_scores[cols]
-    print(all_scores)
-    attributes_map_name = settings.SAVE_DIR + f"ATTRIBUTES_MAP_{id_}.csv"
+
+    path = settings.SAVE_DIR + "kmeans_models_scores.csv"
+    n_clusters_range = np.arange(8, 12).astype(int)
+    scores = get_kmeans_score(transf_embeddings_attributes, attributes_ground_truth_labels,
+                              n_clusters_range=n_clusters_range, id_=id_, save_path=path)
+    print(scores)
+    attributes_map_name = settings.SAVE_DIR + f"attributes_map_{id_}.csv"
     df_attributes_map.to_csv(attributes_map_name)
-    return all_scores
+    attributes_ground_truth_labels = pd.DataFrame(attributes_ground_truth_labels)
+    attributes_true_labels_name = settings.SAVE_DIR + f"attributes_true_labels_{id_}.csv"
+    attributes_ground_truth_labels.to_csv(attributes_true_labels_name)
+    return scores
 
 
 def train_model(module_params, trainer_params):

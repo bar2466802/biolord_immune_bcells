@@ -23,6 +23,10 @@ from sklearn.metrics import rand_score
 from yellowbrick.cluster import SilhouetteVisualizer  # to continue here
 from collections import Counter
 from formatters import *
+import utils.settings as settings
+from collections import Counter
+from random import choice
+
 matplotlib.use('Agg')
 rng = np.random.RandomState(0)
 
@@ -54,7 +58,7 @@ score_funcs = [
     ("Adjusted Rand Index", metrics.adjusted_rand_score),
     ("MI", metrics.mutual_info_score),
     ("NMI", metrics.normalized_mutual_info_score),
-    ("Adjusted Mutual Information", metrics.adjusted_mutual_info_score),
+    ("Adjusted Mutual Information", metrics.adjusted_mutual_info_score)
 ]
 
 ATTRIBUTES = ['celltype', 'organ']
@@ -190,61 +194,170 @@ def uniform_labelings_scores_plot(X, true_labels, title, save_path):
     plt.show()
 
 
-def get_kmeans_score(X, true_labels, n_clusters_range=np.arange(2, 16).astype(int), id_=None, save_path=""):
-    scores_best_kmeans = []
-    for score_name, score_func in score_funcs:
-        scores, best_kmeans = kmeans_scores(X, true_labels, score_name, score_func, n_clusters_range, id_=id_,
-                                            save_path=save_path)
-        best_kmeans['score_name'] = score_name
-        scores_best_kmeans.append(best_kmeans)
-    return pd.DataFrame(scores_best_kmeans)
+def get_random_max_index(labels_list):
+    max_value = np.nanmax(labels_list)
+    # Get a list of indices where the maximum value occurs
+    max_indices = [i for i, x in enumerate(labels_list) if x == max_value]
+    # Get a random index from the list of indices
+    random_index = choice(max_indices)
+    return random_index
 
 
-def kmeans_scores(X, true_labels, score_name, score_func, n_clusters_range, n_runs=5, id_=None, save_path=""):
-    scores = np.zeros((len(n_clusters_range), n_runs))
+def get_counters(ground_truth_labels, labels, num_unique_true_labels):
+    label_counts = {label: Counter([ground_truth_labels[i] for i in range(len(labels)) if labels[i] == label]) for label
+                    in set(labels)}
+    label_counts_df = pd.DataFrame(label_counts).sort_index()
+    label_counts_df /= num_unique_true_labels
+    new_labels = [label_counts[label].most_common(1)[0][0] for label in labels]
+    return label_counts_df, new_labels
+
+
+def robustness(id_, kmeans_labels, true_labels_celltype, true_labels_organ):
+    values = ['B1', 'CYCLING_B', 'IMMATURE_B', 'LARGE_PRE_B', 'LATE_PRO_B', 'MATURE_B', 'PLASMA_B', 'PRE_PRO_B',
+              'PRO_B',
+              'SMALL_PRE_B', 'BM', 'GU', 'KI', 'LI', 'MLN', 'SK', 'SP', 'TH', 'YS']
+    labels_dic = {i: value for i, value in enumerate(values)}
+    number_of_clusters = len(set(kmeans_labels))
+
+    new_labels_list = []
+    df_robustness = {
+        'n_clusters': [],
+        'k': [],
+        'new_id': [],
+        'value': []
+    }
+
+    number_of_celltypes = len(set(true_labels_celltype))
+    number_of_organs = len(set(true_labels_organ))
+
+    label_counts_celltype, new_labels_celltype = get_counters(true_labels_celltype, kmeans_labels, number_of_organs)
+    label_counts_organ, new_labels_organ = get_counters(true_labels_organ, kmeans_labels, number_of_celltypes)
+    new_labels = []
+    for k in list(set(kmeans_labels)):
+        if label_counts_celltype[k].max() > label_counts_organ[k].max():
+            new_val = get_random_max_index(label_counts_celltype[k])
+            max_val = label_counts_celltype[k].max()
+            new_labels.append(new_val)
+        else:
+            new_val = number_of_celltypes + get_random_max_index(label_counts_organ[k])
+            max_val = label_counts_organ[k].max()
+            new_labels.append(new_val)
+
+        df_robustness['new_id'].append(new_val)
+        df_robustness['value'].append(max_val)
+        df_robustness['n_clusters'].append(number_of_clusters)
+        df_robustness['k'].append(k)
+    new_labels_list.append(new_labels)
+
+    most_common_new_labels = [Counter(col).most_common(1)[0][0] for col in zip(*new_labels_list)]
+    meaningful_new_labels = [labels_dic.get(item, item) for item in most_common_new_labels]
+    df_robustness = pd.DataFrame(df_robustness)
+    df_robustness['new_id'] = df_robustness['new_id'].replace(labels_dic)
+
+    print(f'for n_clusters = {number_of_clusters}\nmost_common_new_labels = {meaningful_new_labels}')
+    print(df_robustness)
+    csv_name = settings.SAVE_DIR + f"relabeling_{id_}.csv"
+    df_robustness.to_csv(csv_name)
+
+    return df_robustness['value'].mean(), df_robustness['value'].std()
+
+
+def get_kmeans_score(X, df_true_labels, n_clusters_range=np.arange(8, 12).astype(int), id_=None, save_path=""):
+    return kmeans_scores(X, df_true_labels, n_clusters_range, id_=id_, save_path=save_path)
+    # for score_name, score_func in score_funcs:
+    #     scores = kmeans_scores(X, df_true_labels, score_name, score_func, n_clusters_range, id_=id_,
+    #                                         save_path=save_path)
+    #     scores['score_name'] = score_name
+    #     scores_kmeans.append(scores)
+    # return scores_kmeans
+
+
+# def kmeans_scores(X, df_true_labels, score_name, score_func, n_clusters_range, n_runs=1, id_=None, save_path=""):
+#     scores = np.zeros((len(n_clusters_range), n_runs))
+#     all_kmeans = {
+#         "id_biolord": [],
+#         "id": [],
+#         "n_clusters": [],
+#         "score_name": [],
+#         "score": [],
+#         "labels": [],
+#         "true_labels": []
+#     }
+#     best_kmeans = {
+#         "labels": [],
+#         "n_clusters": 0,
+#         "km": None
+#     }
+#     max_score = -np.inf
+#     for i, n_clusters in enumerate(n_clusters_range):
+#         for j in range(n_runs):
+#             km = KMeans(n_clusters=n_clusters, n_init='auto', random_state=42)
+#             labels_kmeans = km.fit_predict(X)
+#             score = score_func(true_labels, labels_kmeans)
+#             index = (i * n_runs) + j
+#             all_kmeans['id'].append(index)
+#             all_kmeans['id_biolord'].append(id_)
+#             all_kmeans['n_clusters'].append(n_clusters)
+#             all_kmeans['score_name'].append(score_name)
+#             all_kmeans['score'].append(score)
+#             all_kmeans['labels'].append(labels_kmeans)
+#             all_kmeans['true_labels'].append(true_labels)
+#             if score > max_score:
+#                 max_score = score
+#                 best_kmeans['labels'] = labels_kmeans
+#                 best_kmeans['n_clusters'] = n_clusters
+#                 best_kmeans['km'] = km
+#             scores[i, j] = score
+#     best_kmeans['score'] = max_score
+#     all_kmeans = pd.DataFrame(all_kmeans)
+#     # create only if this is the 1st model and 1st score func, otherwise append
+#     if not exists(save_path):
+#         all_kmeans.to_csv(save_path)
+#     else:
+#         all_kmeans.to_csv(save_path, mode='a', header=False)
+#     return scores, best_kmeans
+
+def kmeans_scores(X, df_true_labels, n_clusters_range, id_=None, save_path=""):
     all_kmeans = {
         "id_biolord": [],
         "id": [],
         "n_clusters": [],
-        "score_name": [],
-        "score": [],
         "labels": [],
-        "true_labels": []
+        "robustness_mean": [],
+        "robustness_std": []
     }
-    best_kmeans = {
-        "labels": [],
-        "n_clusters": 0,
-        "km": None
-    }
-    max_score = -np.inf
+
     for i, n_clusters in enumerate(n_clusters_range):
-        for j in range(n_runs):
-            km = KMeans(n_clusters=n_clusters, n_init='auto', random_state=42)
-            labels_kmeans = km.fit_predict(X)
-            score = score_func(true_labels, labels_kmeans)
-            index = (i * n_runs) + j
-            all_kmeans['id'].append(index)
-            all_kmeans['id_biolord'].append(id_)
-            all_kmeans['n_clusters'].append(n_clusters)
-            all_kmeans['score_name'].append(score_name)
-            all_kmeans['score'].append(score)
-            all_kmeans['labels'].append(labels_kmeans)
-            all_kmeans['true_labels'].append(true_labels)
-            if score > max_score:
-                max_score = score
-                best_kmeans['labels'] = labels_kmeans
-                best_kmeans['n_clusters'] = n_clusters
-                best_kmeans['km'] = km
-            scores[i, j] = score
-    best_kmeans['score'] = max_score
+        all_kmeans['id_biolord'].append(id_)
+        all_kmeans['n_clusters'].append(n_clusters)
+        # fit the k means model over the latent space
+        km = KMeans(n_clusters=n_clusters, n_init='auto', random_state=42)
+        labels_kmeans = km.fit_predict(X)
+        all_kmeans['labels'].append(labels_kmeans)
+
+        for score_name, score_func in score_funcs:
+            for attribute, true_labels in zip(df_true_labels['attributes'], df_true_labels['true_labels']):
+                if attribute == "celltype":
+                    true_labels_celltype = true_labels
+                else:
+                    true_labels_organ = true_labels
+                score = score_func(true_labels, labels_kmeans)
+                attribute_score_name = f"score_{score_name}_{attribute}"
+                if attribute_score_name not in all_kmeans:
+                    all_kmeans[attribute_score_name] = []
+                all_kmeans[attribute_score_name].append(score)
+
+        robustness_mean, robustness_std = robustness(id_=id_, kmeans_labels=labels_kmeans,
+                                                     true_labels_celltype=true_labels_celltype,
+                                                     true_labels_organ=true_labels_organ)
+        all_kmeans['robustness_mean'].append(robustness_mean)
+        all_kmeans['robustness_std'].append(robustness_std)
     all_kmeans = pd.DataFrame(all_kmeans)
-    # create only if this is the 1st model and 1st score func, otherwise append
-    csv_name = save_path + "kmeans_models_scores.csv"
-    if id_ == 1 or not exists(csv_name):
-        all_kmeans.to_csv(csv_name)
+    if not exists(save_path):
+        all_kmeans.to_csv(save_path)
     else:
-        all_kmeans.to_csv(csv_name, mode='a', header=False)
-    return scores, best_kmeans
+        all_kmeans.to_csv(save_path, mode='a', header=False)
+    return all_kmeans
 
 
 def kmeans_scores_plot(X, true_labels, title, save_path):
@@ -253,11 +366,8 @@ def kmeans_scores_plot(X, true_labels, title, save_path):
     plt.figure(3)
     plots = []
     names = []
-    ari_best_kmeans = None
     for marker, (score_name, score_func) in zip("d^vx.+*", score_funcs):
-        scores, best_kmeans = kmeans_scores(X, true_labels, score_func, n_clusters_range, save_path)
-        if score_func == metrics.adjusted_rand_score:
-            ari_best_kmeans = best_kmeans
+        scores = kmeans_scores(X, true_labels, score_func, n_clusters_range, save_path)
         plots.append(
             plt.errorbar(
                 n_clusters_range,
@@ -280,7 +390,7 @@ def kmeans_scores_plot(X, true_labels, title, save_path):
     plt.tight_layout()
     plt.savefig(save_path + "kmeans_scores_plot.png", format="png", dpi=300)
     plt.show()
-    return ari_best_kmeans
+    return scores
 
 
 def umap_with_kmeans_labels(df, best_kmeans, title, save_path, attributes_map, attribute_):
@@ -412,10 +522,10 @@ def print_indexes(list_):
     # easily detect the differences between different treatments
 
 
-def silhouette(km, X):
-    visualizer = SilhouetteVisualizer(km, colors='yellowbrick')
-    visualizer.fit(X)  # Fit the data to the visualizer
-    visualizer.show()  # Finalize and render the figure
+# def silhouette(km, X):
+#     visualizer = SilhouetteVisualizer(km, colors='yellowbrick')
+#     visualizer.fit(X)  # Fit the data to the visualizer
+#     visualizer.show()  # Finalize and render the figure
 
 
 if __name__ == '__main__':
