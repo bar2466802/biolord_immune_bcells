@@ -57,3 +57,4 @@ def split_adata_into_train_test():
     print("Train, test, OOD by percentage:")
     p = adata.obs['split'].value_counts(normalize=True) * 100
     print(p)
+
