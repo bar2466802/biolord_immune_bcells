@@ -262,7 +262,7 @@ def robustness(id_, kmeans_labels, true_labels_celltype, true_labels_organ):
     return df_robustness['value'].mean(), df_robustness['value'].std()
 
 
-def get_kmeans_score(X, df_true_labels, n_clusters_range=np.arange(8, 12).astype(int), id_=None, save_path=""):
+def get_kmeans_score(X, df_true_labels, n_clusters_range=np.arange(9, 13).astype(int), id_=None, save_path=""):
     return kmeans_scores(X, df_true_labels, n_clusters_range, id_=id_, save_path=save_path)
     # for score_name, score_func in score_funcs:
     #     scores = kmeans_scores(X, df_true_labels, score_name, score_func, n_clusters_range, id_=id_,
@@ -322,8 +322,8 @@ def kmeans_scores(X, df_true_labels, n_clusters_range, id_=None, save_path=""):
         "id_biolord": [],
         "n_clusters": [],
         "labels": [],
-        "robustness_mean": [],
-        "robustness_std": []
+        "score_robustness_mean": [],
+        "score_robustness_std": []
     }
 
     for i, n_clusters in enumerate(n_clusters_range):
@@ -349,8 +349,8 @@ def kmeans_scores(X, df_true_labels, n_clusters_range, id_=None, save_path=""):
         robustness_mean, robustness_std = robustness(id_=id_, kmeans_labels=labels_kmeans,
                                                      true_labels_celltype=true_labels_celltype,
                                                      true_labels_organ=true_labels_organ)
-        all_kmeans['robustness_mean'].append(robustness_mean)
-        all_kmeans['robustness_std'].append(robustness_std)
+        all_kmeans['score_robustness_mean'].append(robustness_mean)
+        all_kmeans['score_robustness_std'].append(robustness_std)
     all_kmeans = pd.DataFrame(all_kmeans)
     if not exists(save_path):
         all_kmeans.to_csv(save_path)

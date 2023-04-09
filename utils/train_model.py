@@ -53,7 +53,7 @@ def cluster_evaluate(model, id_, attributes=['celltype', 'organ']):
         print(f'For attribute {attribute} the # of unique true labels is: {len(ground_truth_unique_labels)}')
 
     path = settings.SAVE_DIR + "kmeans_models_scores.csv"
-    n_clusters_range = np.arange(8, 12).astype(int)
+    n_clusters_range = np.arange(9, 13).astype(int)
     scores = get_kmeans_score(transf_embeddings_attributes, attributes_ground_truth_labels,
                               n_clusters_range=n_clusters_range, id_=id_, save_path=path)
     print(scores)
@@ -154,7 +154,7 @@ def train_dataset():
     scores['reconstruction_penalty'] = args.reconstruction_penalty
     scores['unknown_attribute_penalty'] = args.unknown_attribute_penalty
     scores['unknown_attribute_noise_param'] = args.unknown_attribute_noise_param
-    scores['id_'] = args.id_
+    # scores['id_'] = args.id_
     scores = pd.DataFrame(scores)
     # for index, score_row in scores.iterrows():
     #     wandb.log({
