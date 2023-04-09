@@ -161,7 +161,7 @@ def train_dataset():
     #         f"attribute_{score_row['attribute']}_score_{score_row['score_name']}": score_row['score'],
     #     })
 
-    if args.id_ == 1 or not exists(settings.LOGS_CSV):
+    if exists(settings.LOGS_CSV):
         scores.to_csv(settings.LOGS_CSV)
     else:
         scores.to_csv(settings.LOGS_CSV, mode='a', header=False)
