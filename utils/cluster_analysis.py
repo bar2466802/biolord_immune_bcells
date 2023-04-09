@@ -23,7 +23,7 @@ from sklearn.metrics import rand_score
 from yellowbrick.cluster import SilhouetteVisualizer  # to continue here
 from collections import Counter
 from formatters import *
-import utils.settings as settings
+import settings as settings
 from collections import Counter
 from random import choice
 

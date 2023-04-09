@@ -44,8 +44,8 @@ settings.init_adata(new_dir_name)
 for i, (n_latent_attribute_categorical, reconstruction_penalty, unknown_attribute_penalty, unknown_attribute_noise_param) in enumerate(parms_combos):
     # trying to recreate this command: srun --gres=gpu:1,vmem:10g --mem=100g -c2 --time=20:00:00 --pty $SHELL
     cmdline0 = ['sbatch', '--gres=gpu:a5000:1', '--mem=100gb', '-c1', '--time=10:00:00',
-                f'--output=../logs/{new_dir_name}/train_model-{i+1}.log',
-                f'--job-name=train-{new_dir_name}-{i+1}',
+                f'--output=../logs/{new_dir_name}/train_model-{str(i+1)}.log',
+                f'--job-name=train-{new_dir_name}-{str(i+1)}',
                 'run_sbatch_train.sh',
                 str(n_latent_attribute_categorical),
                 str(reconstruction_penalty),
