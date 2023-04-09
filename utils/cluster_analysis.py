@@ -356,10 +356,10 @@ def kmeans_scores(X, df_true_labels, n_clusters_range, id_=None, save_path=""):
         all_kmeans['score_robustness_mean'].append(robustness_mean)
         all_kmeans['score_robustness_std'].append(robustness_std)
     all_kmeans = pd.DataFrame(all_kmeans)
-    if not exists(save_path):
-        all_kmeans.to_csv(save_path)
-    else:
-        all_kmeans.to_csv(save_path, mode='a', header=False)
+    # if not exists(save_path):
+    #     all_kmeans.to_csv(save_path)
+    # else:
+    #     all_kmeans.to_csv(save_path, mode='a', header=False)
     return all_kmeans
 
 
