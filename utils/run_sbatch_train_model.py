@@ -75,7 +75,7 @@ if __name__ == "__main__":
                     ]
         cmdline = np.concatenate((cmdline0, cmdline1))
         print(' '.join(cmdline))
-        process = Popen(cmdline, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        process = Popen(cmdline, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)
         stdout, stderr = process.communicate()
         stdout_list = stdout.decode('utf-8').strip().split()
         print(f"stdout_list = {stdout_list}")
