@@ -58,7 +58,7 @@ if __name__ == "__main__":
         cmdline0 = ['sbatch', '--gres=gpu:a5000:1', '--mem=100gb', '-c1', '--time=3:00:00', '--killable',
                     f'--priority={index}',
                     '--parsable',
-                    f"--output='../logs/{new_dir_name}/train_model-{index}.log'",
+                    f'--output=../logs/{new_dir_name}/train_model-{index}.log',
                     f'--job-name=train-{new_dir_name}-{index}'
                 ]
         if job_id is not None:
@@ -75,7 +75,7 @@ if __name__ == "__main__":
                     ]
         cmdline = np.concatenate((cmdline0, cmdline1))
         print(' '.join(cmdline))
-        process = Popen(cmdline, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        process = Popen(cmdline, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
         stdout_list = stdout.decode('utf-8').strip().split()
         stderr_list = stderr.decode('utf-8').strip().split()
