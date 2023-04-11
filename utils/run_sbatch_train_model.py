@@ -51,6 +51,7 @@ if __name__ == "__main__":
         index = str(i + 1)
         log_path = f'../logs/{new_dir_name}/train_model-{index}.log'
         if os.path.exists(log_path):
+            print(f"log file {log_path} exist so skipping it")
             continue
 
         # trying to recreate this command: srun --gres=gpu:1,vmem:10g --mem=100g -c2 --time=20:00:00 --pty $SHELL
