@@ -62,7 +62,7 @@ if __name__ == "__main__":
                     f'--job-name=train-{new_dir_name}-{index}'
                 ]
         if job_id is not None:
-            cmdline0.append(f'--dependency=afterok:<{str(job_id)}>')
+            cmdline0.append(f'--dependency=afterok:{str(job_id)}')
 
         cmdline1 = [
                     'run_sbatch_train.sh',
