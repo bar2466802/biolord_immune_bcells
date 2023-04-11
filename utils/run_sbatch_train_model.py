@@ -55,7 +55,8 @@ if __name__ == "__main__":
             continue
 
         # trying to recreate this command: srun --gres=gpu:1,vmem:10g --mem=100g -c2 --time=20:00:00 --pty $SHELL
-        cmdline0 = ['sbatch', '--gres=gpu:a5000:1', '--mem=100gb', '-c1', '--time=3:00:00', '--killable',
+        cmdline0 = ['sbatch', '--gres=gpu:a5000:1', '--mem=100gb', '-c1', '--time=3:00:00',
+                    # '--killable',
                     f'--priority={index}',
                     '--parsable',
                     f'--output=../logs/{new_dir_name}/train_model-{index}.log',
