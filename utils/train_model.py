@@ -17,7 +17,7 @@ import seaborn as sns
 import itertools
 import matplotlib.pyplot as plt
 import biolord
-import wandb
+# import wandb
 import os
 import sys
 import settings
@@ -141,12 +141,12 @@ def train_dataset():
         "cosine_scheduler": True,
         "scheduler_final_lr": 1e-5,
     }
-    wandb.init(project="biolord_bcells_train", entity="biolord", config=trainer_params)
-    wandb.log({'n_latent_attribute_categorical': args.n_latent_attribute_categorical})
-    wandb.log({'reconstruction_penalty': args.reconstruction_penalty})
-    wandb.log({'unknown_attribute_penalty': args.unknown_attribute_penalty})
-    wandb.log({'unknown_attribute_noise_param': args.unknown_attribute_noise_param})
-    wandb.log({'id_': args.id_})
+    # wandb.init(project="biolord_bcells_train", entity="biolord", config=trainer_params)
+    # wandb.log({'n_latent_attribute_categorical': args.n_latent_attribute_categorical})
+    # wandb.log({'reconstruction_penalty': args.reconstruction_penalty})
+    # wandb.log({'unknown_attribute_penalty': args.unknown_attribute_penalty})
+    # wandb.log({'unknown_attribute_noise_param': args.unknown_attribute_noise_param})
+    # wandb.log({'id_': args.id_})
 
     model = train_model(module_params, trainer_params)
     scores = cluster_evaluate(model, args.id_)
