@@ -35,14 +35,13 @@ if __name__ == "__main__":
             new_dir_name = str(max_folder_name + 1)
         else:
             new_dir_name = "1"
+
+        for dir_path in [settings.SAVE_DIR, settings.FIG_DIR, settings.LOGS_DIR]:
+            if not os.path.exists(dir_path + new_dir_name):
+                os.makedirs(dir_path + new_dir_name)
+        settings.init_adata(new_dir_name)
     else:
         new_dir_name = args.dir
-
-    for dir_path in [settings.SAVE_DIR, settings.FIG_DIR, settings.LOGS_DIR]:
-        if not os.path.exists(dir_path + new_dir_name):
-            os.makedirs(dir_path + new_dir_name)
-
-    settings.init_adata(new_dir_name)
 
     for i, (n_latent_attribute_categorical, reconstruction_penalty, unknown_attribute_penalty,
             unknown_attribute_noise_param) in enumerate(parms_combos):
