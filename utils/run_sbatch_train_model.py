@@ -79,5 +79,6 @@ if __name__ == "__main__":
         stdout, stderr = process.communicate()
         stdout_list = stdout.decode('utf-8').strip().split()
         print(f"stdout_list = {stdout_list}")
+        print(f'stderr = {stderr}')
         job_id = stdout_list[-1]
         print(f'jobid = {job_id}')
