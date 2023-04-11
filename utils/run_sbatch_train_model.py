@@ -77,4 +77,7 @@ if __name__ == "__main__":
         print(' '.join(cmdline))
         process = Popen(cmdline, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
-        job_id = stdout.decode('utf-8').strip().split()[-1]
+        stdout_list = stdout.decode('utf-8').strip().split()
+        print(f"stdout_list = {stdout_list}")
+        job_id = stdout_list[-1]
+        print(f'jobid = {job_id}')
