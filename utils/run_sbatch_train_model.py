@@ -75,10 +75,11 @@ if __name__ == "__main__":
                     ]
         cmdline = np.concatenate((cmdline0, cmdline1))
         print(' '.join(cmdline))
-        process = Popen(cmdline, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)
+        process = Popen(cmdline, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         stdout, stderr = process.communicate()
         stdout_list = stdout.decode('utf-8').strip().split()
+        stderr_list = stderr.decode('utf-8').strip().split()
         print(f"stdout_list = {stdout_list}")
-        print(f'stderr = {stderr}')
+        print(f'stderr = {stderr_list}')
         job_id = stdout_list[-1]
         print(f'jobid = {job_id}')
