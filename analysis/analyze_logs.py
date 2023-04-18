@@ -11,6 +11,7 @@ from plotly.subplots import make_subplots
 import colorcet as cc
 import plotly.graph_objects as go
 import math
+import os
 
 
 
@@ -197,9 +198,53 @@ def plot_robustness(path="../output/2/trained_model_scores.csv", save_png_path="
     # fig.write_image(save_png_path)
 
 
+def create_csv_new_labels(path = "../output/2"):
+    # Loop through all files in the directory
+    df_all_labels = None
+    for filename in os.listdir(path):
+        # Check if the file starts with 'relabling'
+        if 'relabeling' in filename:
+            df_labels = pd.read_csv(path + '/' + filename)
+            df_labels = df_labels.drop('Unnamed: 0', axis=1)
+            df_labels['biolord_id'] = filename.split('_')[1].replace('.csv','')
+            if df_all_labels is not None:
+                df_all_labels = pd.concat([df_all_labels, df_labels], ignore_index=True)
+            else:
+                df_all_labels = df_labels
+
+    df_all_labels = df_all_labels.sort_values(by=['biolord_id', 'n_clusters'], ascending=True)
+    df_all_labels = df_all_labels[['biolord_id', 'n_clusters', 'k', 'new_id', 'value']]
+    df_all_labels.to_csv(settings.SAVE_DIR + "all_new_labels.csv", index=False)
+
+def count_new_labels(path = "../output/all_new_labels.csv"):
+    df_all_labels = pd.read_csv(path)
+    all_new_id_counts = df_all_labels['new_id'].value_counts(normalize=True)
+    print(f'for all df the new ids count is:')
+    print(all_new_id_counts)
+
+    for n_clusters, group in df_all_labels.groupby(['n_clusters']):
+        print('****************************************************8')
+        for k, group_k in df_all_labels.groupby(['k']):
+            group_new_id_counts = group_k['new_id'].value_counts(normalize=True)
+            print(f'for cluster {n_clusters} the new ids are:')
+            print(group_new_id_counts)
+        # labels = list(set(group['new_id']))
+        # # count the frequency of each value
+        # counter = Counter(group['new_id'])
+        # # calculate the percentage of each value
+        # total = len(set(group['biolord_id']))
+        # percentage = {k: v / total * 100 for k, v in counter.items()}
+        # df_labels_percentage = pd.DataFrame(list(percentage.items()), columns=['new_id', 'percentage'])
+
+
+
+
 if __name__ == "__main__":
     settings.init()
-    plot_robustness()
+    # plot_robustness()
     # df_celltype_path = "../output/celltype_kmeans_models_scores.csv"
     # df_organ_path = "../output/organ_kmeans_models_scores.csv"
     # robustness(df_celltype_path, df_organ_path)
+
+    # create_csv_new_labels()
+    count_new_labels()
