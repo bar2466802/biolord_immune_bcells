@@ -54,7 +54,7 @@ if __name__ == "__main__":
             print(f"log file {log_path} exist so skipping it")
             continue
 
-        # trying to recreate this command: srun --gres=gpu:1,vmem:10g --mem=100g -c2 --time=20:00:00 --pty $SHELL
+        # schedule job only after the previous one has ended
         cmdline0 = ['sbatch', '--gres=gpu:a5000:1', '--mem=100gb', '-c1', '--time=3:00:00',
                     # '--killable',
                     f'--priority={index}',
