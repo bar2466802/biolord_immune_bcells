@@ -226,19 +226,30 @@ def count_new_labels(path = "../output/all_new_labels.csv"):
 
     for n_clusters, group in df_all_labels.groupby('n_clusters'):
         print('******************************************************')
-        for k, group_k in group.groupby('k'):
-            group_new_id_counts = group_k['new_id'].value_counts(normalize=True)
-            print(f'for cluster {n_clusters} and k: {k} the new ids are:')
-            print(group_new_id_counts)
+        group_new_id_counts = group['new_id'].value_counts(normalize=True)
+        print(f'for cluster {n_clusters} :')
+        print(group_new_id_counts)
 
-            df_group_new_id_counts = pd.DataFrame({'new_id': group_new_id_counts.index, 'percentage': group_new_id_counts.values})
-            df_group_new_id_counts['n_clusters'] = n_clusters
-            df_group_new_id_counts['k'] = k
+        df_group_new_id_counts = pd.DataFrame({'new_id': group_new_id_counts.index, 'percentage': group_new_id_counts.values})
+        df_group_new_id_counts['n_clusters'] = n_clusters
 
-            if df is not None:
-                df = pd.concat([df, df_group_new_id_counts], ignore_index=True)
-            else:
-                df = df_group_new_id_counts
+        if df is not None:
+            df = pd.concat([df, df_group_new_id_counts], ignore_index=True)
+        else:
+            df = df_group_new_id_counts
+        # for k, group_k in group.groupby('k'):
+        #     group_new_id_counts = group_k['new_id'].value_counts(normalize=True)
+        #     print(f'for cluster {n_clusters} and k: {k} the new ids are:')
+        #     print(group_new_id_counts)
+        #
+        #     df_group_new_id_counts = pd.DataFrame({'new_id': group_new_id_counts.index, 'percentage': group_new_id_counts.values})
+        #     df_group_new_id_counts['n_clusters'] = n_clusters
+        #     df_group_new_id_counts['k'] = k
+        #
+        #     if df is not None:
+        #         df = pd.concat([df, df_group_new_id_counts], ignore_index=True)
+        #     else:
+        #         df = df_group_new_id_counts
         # labels = list(set(group['new_id']))
         # # count the frequency of each value
         # counter = Counter(group['new_id'])
@@ -247,13 +258,13 @@ def count_new_labels(path = "../output/all_new_labels.csv"):
         # percentage = {k: v / total * 100 for k, v in counter.items()}
         # df_labels_percentage = pd.DataFrame(list(percentage.items()), columns=['new_id', 'percentage'])
     df['percentage'] *= 100
-    df = df[['n_clusters', 'k', 'new_id', 'percentage']]
+    df = df[['n_clusters', 'new_id', 'percentage']]
     print(df)
 
     # Group the DataFrame by group1 and group2, and get the top 3 max values for each group
-    top3 = df.groupby(['n_clusters', 'k'])['percentage'].nlargest(3)
+    top3 = df.groupby(['n_clusters'])['percentage'].nlargest(3)
     # Get the indices of the top 3 max values
-    indices = top3.index.get_level_values(level=2)
+    indices = top3.index.get_level_values(level=1)
     # Filter the original DataFrame based on the indices of the top 3 max values
     result = df[df.index.isin(indices)]
     print(result)
