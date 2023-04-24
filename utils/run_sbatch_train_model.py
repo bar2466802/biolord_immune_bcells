@@ -21,6 +21,7 @@ if __name__ == "__main__":
     arr_reconstruction_penalty = [1e-1, 1e1, 1e2, 1e3]
     arr_unknown_attribute_penalty = [1e-1, 1e1, 1e2, 1e3]
     arr_unknown_attribute_noise_param = [1e-1, 1e1, 1e2, 1e3]
+    models_of_interests = [51, 199, 254]
 
     parms_combos = itertools.product(arr_n_latent_attribute_categorical,
                                      arr_reconstruction_penalty,
@@ -49,6 +50,8 @@ if __name__ == "__main__":
             unknown_attribute_noise_param) in enumerate(parms_combos):
         # check if the log for this attempt exist then don't run it again for this repeat
         index = str(i + 1)
+        if int(index) not in models_of_interests:
+            continue
         log_path = f'../logs/{new_dir_name}/train_model-{index}.log'
         if os.path.exists(log_path):
             print(f"log file {log_path} exist so skipping it")

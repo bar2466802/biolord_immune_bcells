@@ -13,6 +13,12 @@ import plotly.graph_objects as go
 import plotly.express as px
 import math
 import os
+import scanpy as sc
+import umap.plot
+
+import sys
+sys.path.append("/cs/usr/bar246802/bar246802/SandBox2023/biolord_immune_bcells/utils")  # add utils
+from utils.formatters import *
 
 
 def get_labels_as_array(row, property_):
@@ -452,6 +458,58 @@ def count_new_labels(path="../output/all_new_labels.csv"):
     # Set plot title
     fig.update_layout(title_text='Scores for diff n_clusters', legend_title_text='Scores')
     fig.show()
+
+
+def create_latent_space_umap(df, transf_embeddings_attributes, id_):
+    # calc pca for UMAP
+    pca = sc.tl.pca(transf_embeddings_attributes)
+    mapper_latent = umap.UMAP().fit_transform(transf_embeddings_attributes)
+    df_for_umap = pd.DataFrame(mapper_latent, columns=["umap1", "umap2"])
+    df['umap1'] = df_for_umap['umap1']
+    df['umap2'] = df_for_umap['umap2']
+
+    df["celltype"] = switch_to_celltype_fullname(df["celltype"])
+    df["organ"] = switch_to_organ_fullname(df["organ"])
+
+    for i in range(pca.shape[1]):
+        df[f"pc{i + 1}"] = pca[:, i]
+
+    # create needed df
+    # attributes_map = get_attributes_map(model)
+    # dfs = {}
+    # columns_latent = [f"latent{i}" for i in range(1, n_latent_attribute_categorical+1)]
+    # for attribute_ in transf_embeddings_attributes_ind:
+    #     dfs[attribute_] = pd.DataFrame(
+    #         transf_embeddings_attributes_ind[attribute_],
+    #         columns=columns_latent)
+    #     dfs[attribute_][attribute_] = list(attributes_map[attribute_].keys())
+    #     dfs[attribute_][attribute_ + '_key'] = list(attributes_map[attribute_].values())
+    #     df[attribute_ + "_key"] = df[attribute_].map(attributes_map[attribute_])
+
+    fig, axs = plt.subplots(1, 1, figsize=(8, 4))
+
+    sns.scatterplot(
+        data=df,
+        x="umap1",
+        y="umap2",
+        hue="celltype",
+        style="organ",
+        ax=axs,
+        alpha=.8,
+        s=60,
+        palette="deep"
+    )
+
+    axs.set_title("cell type")
+    axs.set(xticklabels=[], yticklabels=[])
+    axs.set_xlabel("UMAP1")
+    axs.set_ylabel("UMAP2")
+    axs.grid(False)
+    axs.legend(loc="upper left", bbox_to_anchor=(1, 1), ncols=2)
+
+    plt.tight_layout()
+    plt.savefig(settings.FIG_DIR + f"cell_type{id_}.png", format="png", dpi=300)
+    plt.show()
 
 
 if __name__ == "__main__":

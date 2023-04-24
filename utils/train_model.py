@@ -23,9 +23,11 @@ import sys
 import settings
 
 sys.path.append("/cs/usr/bar246802/bar246802/SandBox2023/biolord_immune_bcells/utils")  # add utils
+sys.path.append("/cs/usr/bar246802/bar246802/SandBox2023/biolord_immune_bcells/")  # add utils
 sys.path.append("/cs/usr/bar246802/bar246802/SandBox2023/biolord")  # set path)
 from cluster_analysis import *
 from formatters import *
+from analysis.analyze_logs import *
 
 print(f"PyTorch version: {torch.__version__}")
 # Set the device
@@ -43,7 +45,7 @@ plt.rcParams['legend.scatterpoints'] = 1
 
 
 def cluster_evaluate(model, id_, attributes=['celltype', 'organ']):
-    transf_embeddings_attributes, df, df_attributes_map = get_transf_embeddings_attributes(model)
+    transf_embeddings_attributes, df, df_attributes_map, transf_embeddings_attributes_ind = get_transf_embeddings_attributes(model)
     attributes_ground_truth_labels = {'attributes': [], 'true_labels': []}
     for attribute in attributes:
         ground_truth_labels = np.array(df[attribute + '_key'])
@@ -62,6 +64,7 @@ def cluster_evaluate(model, id_, attributes=['celltype', 'organ']):
     attributes_ground_truth_labels = pd.DataFrame(attributes_ground_truth_labels)
     attributes_true_labels_name = settings.SAVE_DIR + f"attributes_true_labels_{id_}.csv"
     attributes_ground_truth_labels.to_csv(attributes_true_labels_name)
+    create_latent_space_umap(df, transf_embeddings_attributes, id_)
     return scores
 
 
@@ -149,6 +152,8 @@ def train_dataset():
     # wandb.log({'id_': args.id_})
 
     model = train_model(module_params, trainer_params)
+    model.save(settings.SAVE_DIR + "trained_model_" + str(args.id_), overwrite=True)
+    settings.init_folders(args.folder)
     scores = cluster_evaluate(model, args.id_)
     scores['n_latent_attribute_categorical'] = args.n_latent_attribute_categorical
     scores['reconstruction_penalty'] = args.reconstruction_penalty
