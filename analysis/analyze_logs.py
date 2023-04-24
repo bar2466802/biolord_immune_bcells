@@ -15,7 +15,6 @@ import math
 import os
 
 
-
 def get_labels_as_array(row, property_):
     return np.array(list(row[property_].replace('[', '').replace(']', '').strip().split()), dtype=int)
 
@@ -162,18 +161,17 @@ def plot_robustness(path="../output/2/trained_model_scores.csv", save_png_path="
     subplot_titles = [f"n_clusters = {n_clusters}" for n_clusters in arr_n_clusters]
     fig = make_subplots(rows, 2, subplot_titles=subplot_titles, vertical_spacing=0.14)
 
-
     row = col = 1
     for n_clusters, group in df_scores.groupby(['n_clusters']):
         for score_name in scores_cols:
             fig.append_trace(go.Scatter(
-                        x=group['id_biolord'],
-                        y=group[score_name],
-                        legendgroup=score_name,
-                        name=score_name,
-                        mode='lines',
-                        line=dict(color=scores_color_map[score_name], width=1)
-                    ), row=row, col=col)
+                x=group['id_biolord'],
+                y=group[score_name],
+                legendgroup=score_name,
+                name=score_name,
+                mode='lines',
+                line=dict(color=scores_color_map[score_name], width=1)
+            ), row=row, col=col)
             if col != 1 or row != 1:
                 fig.update_traces(showlegend=False, row=row, col=col)
             # axs[row][col].plot(group['id_biolord'], group[score_name], color=scores_color_map[score_name],
@@ -199,7 +197,7 @@ def plot_robustness(path="../output/2/trained_model_scores.csv", save_png_path="
     # fig.write_image(save_png_path)
 
 
-def create_csv_new_labels(path = "../output/2"):
+def create_csv_new_labels(path="../output/2"):
     # Loop through all files in the directory
     df_all_labels = None
     for filename in os.listdir(path):
@@ -207,7 +205,7 @@ def create_csv_new_labels(path = "../output/2"):
         if 'relabeling' in filename:
             df_labels = pd.read_csv(path + '/' + filename)
             df_labels = df_labels.drop('Unnamed: 0', axis=1)
-            df_labels['biolord_id'] = filename.split('_')[1].replace('.csv','')
+            df_labels['biolord_id'] = filename.split('_')[1].replace('.csv', '')
             if df_all_labels is not None:
                 df_all_labels = pd.concat([df_all_labels, df_labels], ignore_index=True)
             else:
@@ -217,33 +215,178 @@ def create_csv_new_labels(path = "../output/2"):
     df_all_labels = df_all_labels[['biolord_id', 'n_clusters', 'k', 'new_id', 'value']]
     df_all_labels.to_csv(settings.SAVE_DIR + "all_new_labels.csv", index=False)
 
-def count_new_labels(path = "../output/all_new_labels.csv"):
+
+# def count_new_labels(path="../output/all_new_labels.csv"):
+#     df_all_labels = pd.read_csv(path)
+#     all_new_id_counts = df_all_labels['new_id'].value_counts(normalize=True)
+#     # print(f'for all df the new ids count is:')
+#     # print(all_new_id_counts)
+#
+#     df = None
+#
+#     for n_clusters, group in df_all_labels.groupby('n_clusters'):
+#         # print('******************************************************')
+#         group_new_id_counts = group['new_id'].value_counts(normalize=True)
+#         # print(f'for cluster {n_clusters} :')
+#         # print(group_new_id_counts)
+#
+#         robustness_means = []
+#         for id_ in group_new_id_counts.index:
+#             new_id_value_mean = group[group['new_id'] == id_]['value'].mean()
+#             robustness_means.append(new_id_value_mean)
+#
+#         percentages = np.array(group_new_id_counts.values) * 100
+#         # values = np.concatenate((robustness_means, percentages))
+#         # value_type = np.concatenate((['robustness_means'] * len(robustness_means),
+#         #                              ['percentage'] * len(group_new_id_counts.values)))
+#
+#         # df_group_new_id_counts = pd.DataFrame({'new_id': np.repeat(group_new_id_counts.index, 2),
+#         #                                        'value': values,
+#         #                                        'value_type': value_type})
+#         df_group_new_id_counts = pd.DataFrame({'new_id': group_new_id_counts.index,
+#                                                'percentage': percentages,
+#                                                'robustness_means': robustness_means})
+#         df_group_new_id_counts['n_clusters'] = n_clusters
+#
+#         if df is not None:
+#             df = pd.concat([df, df_group_new_id_counts], ignore_index=True)
+#         else:
+#             df = df_group_new_id_counts
+#         # for k, group_k in group.groupby('k'):
+#         #     group_new_id_counts = group_k['new_id'].value_counts(normalize=True)
+#         #     print(f'for cluster {n_clusters} and k: {k} the new ids are:')
+#         #     print(group_new_id_counts)
+#         #
+#         #     df_group_new_id_counts = pd.DataFrame({'new_id': group_new_id_counts.index, 'percentage': group_new_id_counts.values})
+#         #     df_group_new_id_counts['n_clusters'] = n_clusters
+#         #     df_group_new_id_counts['k'] = k
+#         #
+#         #     if df is not None:
+#         #         df = pd.concat([df, df_group_new_id_counts], ignore_index=True)
+#         #     else:
+#         #         df = df_group_new_id_counts
+#         # labels = list(set(group['new_id']))
+#         # # count the frequency of each value
+#         # counter = Counter(group['new_id'])
+#         # # calculate the percentage of each value
+#         # total = len(set(group['biolord_id']))
+#         # percentage = {k: v / total * 100 for k, v in counter.items()}
+#         # df_labels_percentage = pd.DataFrame(list(percentage.items()), columns=['new_id', 'percentage'])
+#     # df['percentage'] *= 100
+#     # df = df[['n_clusters', 'new_id', 'value_type', 'value']]
+#     df = df[['n_clusters', 'new_id', 'robustness_means', 'percentage']]
+#     # add columns for figure
+#     celltypes = ['B1', 'CYCLING_B', 'IMMATURE_B', 'LARGE_PRE_B', 'LATE_PRO_B', 'MATURE_B', 'PLASMA_B', 'PRE_PRO_B',
+#                  'PRO_B', 'SMALL_PRE_B']
+#     organs = ['BM', 'GU', 'KI', 'LI', 'MLN', 'SK', 'SP', 'TH', 'YS']
+#     df['id_type'] = df['new_id'].apply(lambda x: 'celltype' if x in celltypes else 'organ')
+#
+#     df = df[df['n_clusters'] > 8]
+#     # print(df)
+#     # # Group the DataFrame by group1 and group2, and get the top 3 max values for each group
+#     # top3 = df.groupby(['n_clusters'])['percentage'].nlargest(3)
+#     # # Get the indices of the top 3 max values
+#     # indices = top3.index.get_level_values(level=1)
+#     # # Filter the original DataFrame based on the indices of the top 3 max values
+#     # result = df[df.index.isin(indices)]
+#     # print(result)
+#
+#     df = df.sort_values(by=['n_clusters', 'id_type', "percentage", "robustness_means"], ascending=False)
+#     df_celltype = df[df['id_type'] == 'celltype']
+#     df_organ = df[df['id_type'] == 'organ']
+#     # df['percentage'] = df['percentage'].astype(str)
+#     # fig = px.bar(df, x="new_id", y="value", color="value_type", barmode="group",
+#     #              facet_row="id_type", facet_col="n_clusters",
+#     #              category_orders={"organ": organs,
+#     #                               "celltype": celltypes})
+#     # fig.show()
+#
+#     # create grouped bar chart
+#     # fig = px.bar(df, x='new_id', y=['percentage', 'robustness_means'], color='new_id',
+#     #              barmode='group', facet_col='n_clusters', facet_row="id_type")
+#     # df_celltype = df[df['id_type'] == 'celltype']
+#     # df['percentage'] = df['percentage'].astype(str)
+#     # df['robustness_means'] = df['robustness_means'].astype(str)
+#     # df_organ = df[df['id_type'] == 'organ']
+#     # fig = go.Figure(
+#     #     data=[
+#     #         go.Bar(name='percentage', x=df_celltype['new_id'],
+#     #                y=df_celltype['percentage'], yaxis='y',
+#     #                offsetgroup=1),
+#     #         go.Bar(name='robustness_means', x=df_celltype['new_id'], y=df_celltype['robustness_means'], yaxis='y2', offsetgroup=2)
+#     #     ],
+#     #     layout={
+#     #         'yaxis': {'title': 'percentage'},
+#     #         'yaxis2': {'title': 'robustness_means', 'overlaying': 'y', 'side': 'right'}
+#     #     }
+#     # )
+#     #
+#     # # Change the bar mode
+#     # fig.update_layout(barmode='group')
+#     # show chart
+#     # fig.show()
+#
+#     subplot_titles = []
+#     for type in set(df['id_type']):
+#         for n_clusters in set(df['n_clusters']):
+#             subplot_titles.append(f"{type}, n_clusters = {n_clusters}")
+#     specs = [[{"secondary_y": True}] * 4] * 2
+#
+#     fig = make_subplots(rows=2, cols=4, subplot_titles=subplot_titles, specs=specs,
+#                         vertical_spacing=0.3)
+#     row = col = 1
+#
+#     for n_clusters in list(set(df['n_clusters'])) * 2:
+#
+#         if row == 1:
+#             df_for_plot = df_organ[df_organ['n_clusters'] == n_clusters]
+#         else:
+#             df_for_plot = df_celltype[df_celltype['n_clusters'] == n_clusters]
+#
+#         bar1 = go.Bar(x=df_for_plot['new_id'], y=df_for_plot['percentage'], name="percentage", legendgroup="percentage",
+#                marker=dict(color="blue"), yaxis='y',  offsetgroup=1)
+#         ## px.bar(df_for_plot, x='new_id', y='percentage')
+#         fig.add_trace(bar1, row=row, col=col, secondary_y=False)
+#
+#         bar2 = go.Bar(x=df_for_plot['new_id'], y=df_for_plot['robustness_means'], name="robustness_means",
+#                marker=dict(color="paleturquoise"), legendgroup="robustness_means", yaxis='y2', offsetgroup=2)
+#             # px.bar(df_for_plot, x='new_id', y='robustness_means')
+#
+#         fig.add_trace(bar2, row=row, col=col, secondary_y=True)
+#
+#         if col != 1 or row != 1:
+#             fig.update_traces(showlegend=False, row=row, col=col)
+#         if col == 4:
+#             col = 1
+#             row += 1
+#         else:
+#             col += 1
+#
+#     fig.update_layout(barmode='group')
+#     # Set x-axis title
+#     fig.update_xaxes(title_text='New Id')
+#
+#     # Set y-axis titles
+#     fig.update_yaxes(title_text='Percentage', secondary_y=False, range=[0, 12])
+#     fig.update_yaxes(title_text='robustness_means', secondary_y=True, range=[0, 1])
+#     fig.update_layout(yaxis={'title': 'Percentage'},
+#                       yaxis2={'title': 'robustness_means', 'overlaying': 'y', 'side': 'right'})
+#
+#     # Set plot title
+#     fig.update_layout(title_text='Scores for diff n_clusters', legend_title_text='Scores')
+#     fig.show()
+
+def count_new_labels(path="../output/all_new_labels.csv"):
     df_all_labels = pd.read_csv(path)
-    all_new_id_counts = df_all_labels['new_id'].value_counts(normalize=True)
-    print(f'for all df the new ids count is:')
-    print(all_new_id_counts)
-
     df = None
-
     for n_clusters, group in df_all_labels.groupby('n_clusters'):
-        print('******************************************************')
         group_new_id_counts = group['new_id'].value_counts(normalize=True)
-        print(f'for cluster {n_clusters} :')
-        print(group_new_id_counts)
-
         robustness_means = []
         for id_ in group_new_id_counts.index:
             new_id_value_mean = group[group['new_id'] == id_]['value'].mean()
             robustness_means.append(new_id_value_mean)
 
         percentages = np.array(group_new_id_counts.values) * 100
-        # values = np.concatenate((robustness_means, percentages))
-        # value_type = np.concatenate((['robustness_means'] * len(robustness_means),
-        #                              ['percentage'] * len(group_new_id_counts.values)))
-
-        # df_group_new_id_counts = pd.DataFrame({'new_id': np.repeat(group_new_id_counts.index, 2),
-        #                                        'value': values,
-        #                                        'value_type': value_type})
         df_group_new_id_counts = pd.DataFrame({'new_id': group_new_id_counts.index,
                                                'percentage': percentages,
                                                'robustness_means': robustness_means})
@@ -253,78 +396,62 @@ def count_new_labels(path = "../output/all_new_labels.csv"):
             df = pd.concat([df, df_group_new_id_counts], ignore_index=True)
         else:
             df = df_group_new_id_counts
-        # for k, group_k in group.groupby('k'):
-        #     group_new_id_counts = group_k['new_id'].value_counts(normalize=True)
-        #     print(f'for cluster {n_clusters} and k: {k} the new ids are:')
-        #     print(group_new_id_counts)
-        #
-        #     df_group_new_id_counts = pd.DataFrame({'new_id': group_new_id_counts.index, 'percentage': group_new_id_counts.values})
-        #     df_group_new_id_counts['n_clusters'] = n_clusters
-        #     df_group_new_id_counts['k'] = k
-        #
-        #     if df is not None:
-        #         df = pd.concat([df, df_group_new_id_counts], ignore_index=True)
-        #     else:
-        #         df = df_group_new_id_counts
-        # labels = list(set(group['new_id']))
-        # # count the frequency of each value
-        # counter = Counter(group['new_id'])
-        # # calculate the percentage of each value
-        # total = len(set(group['biolord_id']))
-        # percentage = {k: v / total * 100 for k, v in counter.items()}
-        # df_labels_percentage = pd.DataFrame(list(percentage.items()), columns=['new_id', 'percentage'])
-    # df['percentage'] *= 100
-    # df = df[['n_clusters', 'new_id', 'value_type', 'value']]
+
     df = df[['n_clusters', 'new_id', 'robustness_means', 'percentage']]
     # add columns for figure
     celltypes = ['B1', 'CYCLING_B', 'IMMATURE_B', 'LARGE_PRE_B', 'LATE_PRO_B', 'MATURE_B', 'PLASMA_B', 'PRE_PRO_B',
-              'PRO_B', 'SMALL_PRE_B']
+                 'PRO_B', 'SMALL_PRE_B']
     organs = ['BM', 'GU', 'KI', 'LI', 'MLN', 'SK', 'SP', 'TH', 'YS']
     df['id_type'] = df['new_id'].apply(lambda x: 'celltype' if x in celltypes else 'organ')
 
     df = df[df['n_clusters'] > 8]
-    # print(df)
-    # # Group the DataFrame by group1 and group2, and get the top 3 max values for each group
-    # top3 = df.groupby(['n_clusters'])['percentage'].nlargest(3)
-    # # Get the indices of the top 3 max values
-    # indices = top3.index.get_level_values(level=1)
-    # # Filter the original DataFrame based on the indices of the top 3 max values
-    # result = df[df.index.isin(indices)]
-    # print(result)
-
+    df = df.sort_values(by=['n_clusters', 'id_type', "percentage", "robustness_means"], ascending=False)
     df_celltype = df[df['id_type'] == 'celltype']
-    df['percentage'] = df['percentage'].astype(str)
-    fig = px.bar(df, x="new_id", y="value", color="value_type", barmode="group",
-                 facet_row="id_type", facet_col="n_clusters",
-                 category_orders={"organ": organs,
-                                  "celltype": celltypes})
-    fig.show()
+    df_organ = df[df['id_type'] == 'organ']
 
-    # create grouped bar chart
-    # fig = px.bar(df, x='new_id', y=['percentage', 'robustness_means'], color='new_id',
-    #              barmode='group', facet_col='n_clusters', facet_row="id_type")
-    # df_celltype = df[df['id_type'] == 'celltype']
-    # df['percentage'] = df['percentage'].astype(str)
-    # df['robustness_means'] = df['robustness_means'].astype(str)
-    # df_organ = df[df['id_type'] == 'organ']
-    # fig = go.Figure(
-    #     data=[
-    #         go.Bar(name='percentage', x=df_celltype['new_id'],
-    #                y=df_celltype['percentage'], yaxis='y',
-    #                offsetgroup=1),
-    #         go.Bar(name='robustness_means', x=df_celltype['new_id'], y=df_celltype['robustness_means'], yaxis='y2', offsetgroup=2)
-    #     ],
-    #     layout={
-    #         'yaxis': {'title': 'percentage'},
-    #         'yaxis2': {'title': 'robustness_means', 'overlaying': 'y', 'side': 'right'}
-    #     }
-    # )
-    #
-    # # Change the bar mode
-    # fig.update_layout(barmode='group')
-    # show chart
-    fig.show()
+    subplot_titles = []
+    for type in set(df['id_type']):
+        for n_clusters in set(df['n_clusters']):
+            subplot_titles.append(f"{type}, n_clusters = {n_clusters}")
+    specs = [[{"secondary_y": True}] * 4] * 2
 
+    fig = make_subplots(rows=2, cols=4, subplot_titles=subplot_titles, specs=specs,
+                        vertical_spacing=0.3)
+    row = col = 1
+    for n_clusters in list(set(df['n_clusters'])) * 2:
+
+        if row == 1:
+            df_for_plot = df_organ[df_organ['n_clusters'] == n_clusters]
+        else:
+            df_for_plot = df_celltype[df_celltype['n_clusters'] == n_clusters]
+
+        bar1 = go.Bar(x=df_for_plot['new_id'], y=df_for_plot['percentage'], name="percentage", legendgroup="percentage",
+               marker=dict(color="blue"), yaxis='y',  offsetgroup=1)
+        fig.add_trace(bar1, row=row, col=col, secondary_y=False)
+
+        bar2 = go.Bar(x=df_for_plot['new_id'], y=df_for_plot['robustness_means'], name="robustness_means",
+               marker=dict(color="paleturquoise"), legendgroup="robustness_means", yaxis='y2', offsetgroup=2)
+        fig.add_trace(bar2, row=row, col=col, secondary_y=True)
+
+        if col != 1 or row != 1:
+            fig.update_traces(showlegend=False, row=row, col=col)
+        if col == 4:
+            col = 1
+            row += 1
+        else:
+            col += 1
+
+    fig.update_layout(barmode='group')
+    # Set x-axis title
+    fig.update_xaxes(title_text='New Id')
+    # Set y-axis titles
+    fig.update_yaxes(title_text='Percentage', secondary_y=False, range=[0, 12])
+    fig.update_yaxes(title_text='robustness_means', secondary_y=True, range=[0, 1])
+    fig.update_layout(yaxis={'title': 'Percentage'},
+                      yaxis2={'title': 'robustness_means', 'overlaying': 'y', 'side': 'right'})
+    # Set plot title
+    fig.update_layout(title_text='Scores for diff n_clusters', legend_title_text='Scores')
+    fig.show()
 
 
 if __name__ == "__main__":
