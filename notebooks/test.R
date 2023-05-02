@@ -1,6 +1,6 @@
-# remotes::install_github("YuLab-SMU/clusterProfiler", force = TRUE, lib="4.3") 
+remotes::install_github("YuLab-SMU/clusterProfiler", force = TRUE, lib="~/local/R_libs/")
 # install the packages
-# remotes::install_github("YuLab-SMU/createKEGGdb", force = TRUE, lib="4.3")
+remotes::install_github("YuLab-SMU/createKEGGdb", force = TRUE, lib="~/local/R_libs/")
 # import the library and create a KEGG database locally 
 # library(createKEGGdb)
 # species <-c("ath","hsa","mmu", "rno","dre","dme","cel")
