@@ -15,15 +15,15 @@ def switch_to_celltype_fullname(col):
     col = col.replace(
         {
             "B1": "B1",
-            "CYCLING_B": "cycling B",
-            "IMMATURE_B": "immature B",
-            "LARGE_PRE_B": "large pre B",
-            "LATE_PRO_B": "late pro B",
-            "MATURE_B": "mature B",
-            "PLASMA_B": "palsma B",
-            "PRE_PRO_B": "pre pro B",
-            "PRO_B": "pro B",
-            "SMALL_PRE_B": "small pre B",
+            "CYCLING_B": "Cycling B",
+            "IMMATURE_B": "Immature B",
+            "LARGE_PRE_B": "Large pre B",
+            "LATE_PRO_B": "Late pro B",
+            "MATURE_B": "Mature B",
+            "PLASMA_B": "Palsma B",
+            "PRE_PRO_B": "Pre pro B",
+            "PRO_B": "Pro B",
+            "SMALL_PRE_B": "Small pre B",
         }
     )
     return col
