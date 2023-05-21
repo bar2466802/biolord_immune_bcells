@@ -20,7 +20,7 @@ def switch_to_celltype_fullname(col):
             "LARGE_PRE_B": "Large pre B",
             "LATE_PRO_B": "Late pro B",
             "MATURE_B": "Mature B",
-            "PLASMA_B": "Palsma B",
+            "PLASMA_B": "Plasma B",
             "PRE_PRO_B": "Pre pro B",
             "PRO_B": "Pro B",
             "SMALL_PRE_B": "Small pre B",
