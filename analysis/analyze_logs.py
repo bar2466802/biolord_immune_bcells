@@ -514,11 +514,11 @@ def create_latent_space_umap(df, transf_embeddings_attributes, id_):
 
 if __name__ == "__main__":
     settings.init()
-    # plot_robustness()
+    plot_robustness()
     # df_celltype_path = "../output/celltype_kmeans_models_scores.csv"
     # df_organ_path = "../output/organ_kmeans_models_scores.csv"
     # robustness(df_celltype_path, df_organ_path)
 
     # create_csv_new_labels()
-    count_new_labels()
+    # count_new_labels()
     print('end')
